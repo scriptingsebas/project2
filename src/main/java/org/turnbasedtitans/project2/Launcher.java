@@ -1,4 +1,4 @@
-package org.turnedbasedtitans.project2;
+package org.turnbasedtitans.project2;
 
 import javafx.application.Application;
 

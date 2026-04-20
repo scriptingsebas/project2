@@ -1,4 +1,4 @@
-package org.turnedbasedtitans.project2.model;
+package org.turnbasedtitans.project2.model;
 
 /**
  * [Brief one-sentence description of what this class does.]

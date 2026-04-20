@@ -1,6 +1,6 @@
-package org.turnedbasedtitans.project2.dao;
+package org.turnbasedtitans.project2.dao;
 
-import org.turnedbasedtitans.project2.model.Item;
+import org.turnbasedtitans.project2.model.Item;
 
 import java.util.List;
 
