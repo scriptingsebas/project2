@@ -1,4 +1,4 @@
-package org.example.project2;
+package org.turnedbasedtitans.project2;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

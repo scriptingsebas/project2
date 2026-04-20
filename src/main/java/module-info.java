@@ -3,6 +3,6 @@ module org.example.project2 {
     requires javafx.fxml;
 
 
-    opens org.example.project2 to javafx.fxml;
-    exports org.example.project2;
+    opens org.turnedbasedtitans.project2 to javafx.fxml;
+    exports org.turnedbasedtitans.project2;
 }
