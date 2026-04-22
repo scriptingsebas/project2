@@ -9,46 +9,52 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    private static final int SCENE_WIDTH = 400;
-    private static final int SCENE_HEIGHT = 300;
+    //These are text presets, like they arent used for anything else aside from setting text
+    private static final int SCENE_WIDTH = 720;
+    private static final int SCENE_HEIGHT = 320;
     private static final int prefWidth = 200;
-    private static final String TITLETEXT = "Farhenheit -> Celcius";
-    private static final String INPUTERTEXT = "Enter °F";
-    private static final String BUTTONTEXT = "Convert";
-    private static final String RESULTTEXT = "HOLYSMOKESITWORKED!";
+    private static final String TITLETEXT = "Login";
+    private static final String USERTEXT = "Username";
+    private static final String PASSTEXT = "Password";
+    private static final String CREATE = "Register";
+    private static final String REGUSERTEXT = "Username";
+    private static final String REGPASSTEXT = "Password";
+    private static final String VERIFY = "Login";
+    private static final String FAILED = "Password or Username is incorrect!";
 
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
+    //main start of the program don't touch.
     public void start(Stage stage) {
-        int spacing= 12;
-        Label TITLETEX =  new Label(TITLETEXT);
-        TextField INPUTER = new TextField();
-        INPUTER.setPromptText(INPUTERTEXT);
-        Label RESULTS = new Label();
-
-        Button convert = new Button(BUTTONTEXT);
-        convert.setOnAction(e -> {
-            convert.setText("Converted");
-            String input = INPUTER.getText();
-            try{
-                double temperature = Double.parseDouble(input);
-            }catch (NumberFormatException ex){
-                RESULTS.setText("INVALID INPUT MONK");
-            }
-        });
-
-        VBox mainChasis = new VBox(spacing,TITLETEX,INPUTER,convert,RESULTS);
-        mainChasis.setPadding(new Insets(30));
-        mainChasis.setAlignment(Pos.CENTER);
-        INPUTER.setPrefWidth(prefWidth);
-
-        Scene scene = new Scene(mainChasis, SCENE_WIDTH, SCENE_HEIGHT);
-
-        stage.setTitle("Temperature" + " Converter");
-        stage.setScene(scene);
+        stage.setTitle("Battle Quest");
+        stage.setScene(home(stage));
         stage.show();
     }
+
+    private Scene home(Stage stage) {
+        int spacing = 13;
+        Label title = new Label("RPG BATTLE QUEST");
+        Button create = new Button("Create Account");
+        Button login = new Button("Login");
+        Label RESULTS = new Label();
+
+        create.setOnAction(e -> {
+
+        });
+
+        login.setOnAction(e -> {
+
+        });
+
+        VBox homePage = new VBox(spacing, title, create, login);
+        homePage.setPadding(new Insets(30));
+        homePage.setAlignment(Pos.CENTER);
+
+        return new Scene(homePage, SCENE_WIDTH, SCENE_HEIGHT);
+    }
+
+    // TO create scene factory make private Scene scenename(Stage stage)
 }
