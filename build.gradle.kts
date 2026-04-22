@@ -26,8 +26,8 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainModule.set("org.example.project2")
-    mainClass.set("org.example.project2.HelloApplication")
+    mainModule.set("org.turnbasedtitans.project2")
+    mainClass.set("org.turnbasedtitans.project2.Main")
 }
 
 javafx {
