@@ -1,5 +1,6 @@
-package org.turnbasedtitans.project2.dao;
+package org.turnbasedtitans.project2.impl;
 
+import org.turnbasedtitans.project2.dao.BattleDAO;
 import org.turnbasedtitans.project2.model.Battle;
 import org.turnbasedtitans.project2.database.DatabaseManager;
 
