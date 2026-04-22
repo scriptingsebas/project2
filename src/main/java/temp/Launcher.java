@@ -1,4 +1,4 @@
-package org.example.project2;
+package temp;
 
 import javafx.application.Application;
 

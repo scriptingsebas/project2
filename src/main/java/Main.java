@@ -1,4 +1,3 @@
-package main.java;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -39,8 +38,6 @@ public class Main extends Application {
             }catch (NumberFormatException ex){
                 RESULTS.setText("INVALID INPUT MONK");
             }
-            RESULTS.setText(String.valueOf(TemperatureConverters.convertFormula(Double.parseDouble(INPUTER.getText()))));
-            INPUTER.clear();
         });
 
         VBox mainChasis = new VBox(spacing,TITLETEX,INPUTER,convert,RESULTS);
