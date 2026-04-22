@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.turnbasedtitans.project2.controller.VillageController">
+
+    <children>
+        <Label layoutX="320.0" layoutY="30.0" text="THE VILLAGE" />
+
+        <ProgressBar fx:id="healthBar" layoutX="35.0" layoutY="85.0" prefWidth="710.0" progress="1.0" />
+        <Label fx:id="healthLabel" layoutX="760.0" layoutY="78.0" text="100%" />
+
+        <VBox alignment="CENTER" layoutX="540.0" layoutY="145.0" prefHeight="380.0" prefWidth="320.0" spacing="25.0">
+            <padding>
+                <Insets bottom="25.0" left="20.0" right="20.0" top="25.0"/>
+            </padding>
+            <children>
+                <Label text="SHOP" />
+                <Button fx:id="shieldButton" mnemonicParsing="false" prefWidth="260.0" text="Shield - 100" />
+                <Button fx:id="swordButton" mnemonicParsing="false" prefWidth="260.0" text="Sword Upgrade - 300" />
+                <Button fx:id="healingButton" mnemonicParsing="false" prefWidth="260.0" text="Healing - 20" />
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

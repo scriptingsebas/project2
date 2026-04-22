@@ -12,6 +12,9 @@ public class DatabaseManager {
     // The path after it is the database file location .
     private static final String DB_URL = "jdbc:sqlite:app.db";
     private Connection connection;
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(DB_URL);
+    }
     public DatabaseManager() {
         try {
             connection = DriverManager.getConnection(DB_URL);
@@ -45,7 +48,6 @@ public class DatabaseManager {
             """;
 
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute(accountTable);
             stmt.execute(userTable);
             stmt.execute(inventoryTable);
         } catch (SQLException e) {
