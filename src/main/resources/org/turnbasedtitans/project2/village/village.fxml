@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.canvas.Canvas?>
+
+<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.turnbasedtitans.project2.controller.VillageController"
+            stylesheets="@style.css">
+
+    <!-- Main village screen-->
+
+    <children>
+        <!-- Title at the top of the screen. Change the text or title-label CSS to edit it. -->
+        <Label text="THE VILLAGE" styleClass="title-label" AnchorPane.topAnchor="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" alignment="CENTER" />
+
+        <!-- Character sprite area -->
+        <VBox AnchorPane.leftAnchor="-40.0"
+              AnchorPane.topAnchor="120.0"
+              AnchorPane.bottomAnchor="40.0"
+              alignment="CENTER">
+            <children>
+                <Canvas fx:id="heroSprite" />
+            </children>
+        </VBox>
+
+        <!-- Health bar area -->
+        <HBox fx:id="healthContainer" alignment="CENTER" spacing="6.0" AnchorPane.topAnchor="85.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0">
+            <children>
+                <ProgressBar fx:id="healthBar" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" prefHeight="25.0" progress="1.0" style="-fx-accent: #16d715;" />
+                <Label fx:id="healthLabel" text="100%" style="-fx-font-size: 20px;" />
+            </children>
+        </HBox>
+
+        <!-- Shop panel -->
+        <VBox alignment="TOP_CENTER" prefWidth="350.0" prefHeight="420.0" maxHeight="420.0" spacing="22.0"
+              AnchorPane.topAnchor="160.0" AnchorPane.leftAnchor="520.0"
+              styleClass="shop-panel">
+            <padding>
+                <Insets top="28.0" left="18.0" right="18.0" bottom="18.0"/>
+            </padding>
+            <children>
+                <!-- Shop title -->
+                <Label text="SHOP" styleClass="shop-title" />
+
+                <!-- Shield shop button. Text and price are controlled by the Labels inside this Button. -->
+                <Button fx:id="shieldButton" mnemonicParsing="false" prefHeight="85.0" maxWidth="1.7976931348623157E308" styleClass="shop-button">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <Label text="Shield -" styleClass="shop-button-text" />
+                                <Label text="100" styleClass="shop-price-text" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- Sword upgrade shop button -->
+                <Button fx:id="swordButton" mnemonicParsing="false" prefHeight="85.0" maxWidth="1.7976931348623157E308" styleClass="shop-button">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <Label text="Sword Upgrade" styleClass="shop-button-text" />
+                                <Label text="300" styleClass="shop-price-text" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- Healing item shop button -->
+                <Button fx:id="healingButton" mnemonicParsing="false" prefHeight="85.0" maxWidth="1.7976931348623157E308" styleClass="shop-button">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <Label text="Healing" styleClass="shop-button-text" />
+                                <Label text="20" styleClass="shop-price-text" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- Back button -->
+                <Button mnemonicParsing="false" prefHeight="85.0" maxWidth="1.7976931348623157E308" styleClass="shop-button">
+                    <graphic>
+                        <Label text="Back" styleClass="shop-button-text" />
+                    </graphic>
+                </Button>
+
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
