@@ -5,6 +5,6 @@ module org.turnbasedtitans.project2 {
 
     opens org.turnbasedtitans.project2.controller to javafx.fxml;
 
-    exports org.turnbasedtitans.project2;
-    exports org.turnbasedtitans.project2.database;
+    opens temp to javafx.fxml;
+    exports temp;
 }
