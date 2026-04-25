@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -42,7 +43,7 @@ public class Main extends Application {
         Label RESULTS = new Label();
 
         create.setOnAction(e -> {
-
+            stage.setScene(registerPage(stage));
         });
 
         login.setOnAction(e -> {
@@ -56,5 +57,54 @@ public class Main extends Application {
         return new Scene(homePage, SCENE_WIDTH, SCENE_HEIGHT);
     }
 
+
+    private Scene registerPage(Stage stage) {
+        Label title = new Label("Create  Account");
+        TextField username = new TextField();
+        TextField password = new TextField();
+        Button create = new Button("Create Account");
+        Button back = new Button("Back");
+
+        back.setOnAction(e -> {
+            stage.setScene(home(stage));
+
+        });
+
+        create.setOnAction(e -> {
+            stage.setScene(logInPage(stage));
+        });
+
+        VBox general = new VBox(title, username, password, create);
+        BorderPane registerPg = new BorderPane(back);
+
+        registerPg.setCenter(general);
+        BorderPane.setAlignment(back, Pos.BOTTOM_LEFT);
+
+        return new Scene(registerPg, SCENE_WIDTH, SCENE_HEIGHT);
+    }
+
+    private Scene logInPage(Stage stage) {
+        Label title = new Label("Log In");
+        TextField username = new TextField();
+        TextField password = new TextField();
+        Button logIn = new Button("log In");
+        Button back = new Button("Back");
+
+        back.setOnAction(e -> {
+            stage.setScene(home(stage));
+        });
+
+        logIn.setOnAction(e -> {
+            //stage.setscene(game(stage));
+        });
+
+        VBox general = new VBox(title, username, password, logIn);
+        BorderPane registerPg = new BorderPane(back);
+
+        registerPg.setCenter(general);
+        BorderPane.setAlignment(back, Pos.BOTTOM_LEFT);
+
+        return new Scene(registerPg, SCENE_WIDTH, SCENE_HEIGHT);
+    }
     // TO create scene factory make private Scene scenename(Stage stage)
 }
