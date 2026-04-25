@@ -11,8 +11,8 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     //These are text presets, like they arent used for anything else aside from setting text
-    private static final int SCENE_WIDTH = 720;
-    private static final int SCENE_HEIGHT = 320;
+    private static final int SCENE_WIDTH = 430;
+    private static final int SCENE_HEIGHT = 720;
     private static final int prefWidth = 200;
     private static final String TITLETEXT = "Login";
     private static final String USERTEXT = "Username";
@@ -47,7 +47,7 @@ public class Main extends Application {
         });
 
         login.setOnAction(e -> {
-
+            stage.setScene(logInPage(stage));
         });
 
         VBox homePage = new VBox(spacing, title, create, login);
@@ -71,22 +71,21 @@ public class Main extends Application {
         });
 
         create.setOnAction(e -> {
-            stage.setScene(logInPage(stage));
+            //stage.setScene(town(stage))
         });
 
-        VBox general = new VBox(title, username, password, create);
-        BorderPane registerPg = new BorderPane(back);
+        VBox general = new VBox(title, username, password, create, back);
+        general.setAlignment(Pos.CENTER);
+        general.setPadding(new Insets(30));
+        general.setSpacing(15);
 
-        registerPg.setCenter(general);
-        BorderPane.setAlignment(back, Pos.BOTTOM_LEFT);
-
-        return new Scene(registerPg, SCENE_WIDTH, SCENE_HEIGHT);
+        return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
     }
 
     private Scene logInPage(Stage stage) {
         Label title = new Label("Log In");
-        TextField username = new TextField();
-        TextField password = new TextField();
+        TextField username = new TextField("Username");
+        TextField password = new TextField("Password");
         Button logIn = new Button("log In");
         Button back = new Button("Back");
 
@@ -98,13 +97,12 @@ public class Main extends Application {
             //stage.setscene(game(stage));
         });
 
-        VBox general = new VBox(title, username, password, logIn);
-        BorderPane registerPg = new BorderPane(back);
+        VBox general = new VBox(title, username, password, logIn, back);
+        general.setAlignment(Pos.CENTER);
+        general.setPadding(new Insets(30));
+        general.setSpacing(15);
 
-        registerPg.setCenter(general);
-        BorderPane.setAlignment(back, Pos.BOTTOM_LEFT);
-
-        return new Scene(registerPg, SCENE_WIDTH, SCENE_HEIGHT);
+        return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
     }
-    // TO create scene factory make private Scene scenename(Stage stage)
+
 }
