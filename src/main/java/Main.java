@@ -19,10 +19,8 @@ public class Main extends Application {
         launch(args);
     }
 
-
     private DatabaseManager userDataManager;
     private UserDAO userDAO;
-
 
     @Override
     //main start of the program don't touch.
@@ -42,11 +40,12 @@ public class Main extends Application {
         Button login = new Button("Login");
 
         create.setOnAction(e -> {
+            stage.setScene(registerPage(stage));
 
         });
 
         login.setOnAction(e -> {
-
+            stage.setScene(logInPage(stage));
         });
 
         VBox homePage = new VBox(spacing, title, create, login);
@@ -55,7 +54,6 @@ public class Main extends Application {
 
         return new Scene(homePage, SCENE_WIDTH, SCENE_HEIGHT);
     }
-
 
     private Scene registerPage(Stage stage) {
         Label title = new Label("Create  Account");
