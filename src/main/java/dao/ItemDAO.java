@@ -1,11 +1,9 @@
-package org.turnbasedtitans.project2.dao;
-
-import org.turnbasedtitans.project2.model.Item;
+package dao;
 
 import java.util.List;
 
 /**
- *  * Data access operations for Item entities.
+ *  * Data access operations for dao.Item entities.
  *
  * @author Sebastian Guillen
  * @since 4/20/26

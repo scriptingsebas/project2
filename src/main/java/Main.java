@@ -30,7 +30,7 @@ public class Main extends Application {
     @Override
     //main start of the program don't touch.
     public void start(Stage stage) {
-        stage.setTitle("Battle Quest");
+        stage.setTitle("dao.Battle Quest");
         stage.setScene(home(stage));
         stage.show();
     }
