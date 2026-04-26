@@ -222,4 +222,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# SQLite database
+*.sqlite
+*.db
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,intellij,java,groovy
