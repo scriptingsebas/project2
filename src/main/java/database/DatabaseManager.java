@@ -1,4 +1,4 @@
-package org.turnbasedtitans.project2.database;
+package database;
 /**
  * Manages database connection and initialization.
  *

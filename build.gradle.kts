@@ -1,7 +1,6 @@
 plugins {
     java
     application
-    id("org.javamodularity.moduleplugin") version "1.8.15"
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("org.beryx.jlink") version "2.25.0"
 }
@@ -26,8 +25,7 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainModule.set("org.turnbasedtitans.project2")
-    mainClass.set("org.turnbasedtitans.project2.Main")
+    mainClass.set("Main")
 }
 
 javafx {
