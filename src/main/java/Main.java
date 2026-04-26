@@ -14,14 +14,6 @@ public class Main extends Application {
     private static final int SCENE_WIDTH = 430;
     private static final int SCENE_HEIGHT = 720;
     private static final int prefWidth = 200;
-    private static final String TITLETEXT = "Login";
-    private static final String USERTEXT = "Username";
-    private static final String PASSTEXT = "Password";
-    private static final String CREATE = "Register";
-    private static final String REGUSERTEXT = "Username";
-    private static final String REGPASSTEXT = "Password";
-    private static final String VERIFY = "Login";
-    private static final String FAILED = "Password or Username is incorrect!";
 
     public static void main(String[] args) {
         launch(args);
