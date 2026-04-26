@@ -44,7 +44,8 @@ public class Main extends Application {
     //This is not entirely implemented nor is the RPGScene enum. Update it as you see fit
     //with a separate case for your scene. You'll most likely need to update your methods
     //as well. Below is an example of how to utilize the SceneFactory.
-    //stage.setScene(createScene(RPGScene.HOME, stage));
+    //stage.setScene(sceneCreate(RPGScene.HOME, stage));
+    //This'll be good for switching scenes with a method call to our SceneFactory.
     private Scene sceneCreate(RPGScene rpgScene, Stage stage) {
         switch (rpgScene) {
             case HOME:
