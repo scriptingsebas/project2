@@ -10,7 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    //These are text presets, like they arent used for anything else aside from setting text
+    //These are text presets, like they aren't used for anything else aside from setting text
     private static final int SCENE_WIDTH = 430;
     private static final int SCENE_HEIGHT = 720;
     private static final int prefWidth = 200;
@@ -59,7 +59,6 @@ public class Main extends Application {
 
         back.setOnAction(e -> {
             stage.setScene(home(stage));
-
         });
 
         create.setOnAction(e -> {
@@ -86,7 +85,7 @@ public class Main extends Application {
         });
 
         logIn.setOnAction(e -> {
-            //stage.setscene(game(stage));
+            //stage.setscene(town(stage));
         });
 
         VBox general = new VBox(title, username, password, logIn, back);
