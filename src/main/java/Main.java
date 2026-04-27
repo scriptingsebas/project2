@@ -17,7 +17,7 @@ public class Main extends Application {
     private static final int prefWidth = 200;
 
     //DUNGEON TEXT PRESETS
-    private static final String dungeonTitle = "The Dungeon";
+    private final String dungeonTitle = "The Dungeon";
     private static final String bodyText = "The atmosphere is dark and oppressive.";
     private static final String conclusionText = "Many have entered seeking glory, but none have returned.";
     private static final String userPrompt = "What do you do?";
@@ -152,7 +152,7 @@ public class Main extends Application {
 
         return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
     }
-    private Scene dungeonStart (Stage stage) {
+    Scene dungeonStart (Stage stage) {
         int dungeonSpacing = 10;
 
         Label titleLabel = new Label(dungeonTitle);
@@ -221,6 +221,7 @@ public class Main extends Application {
 
         return new Scene(fightLayout, SCENE_WIDTH, SCENE_HEIGHT);
     }
+
     // TO create scene factory make private Scene scenename(Stage stage)
 }
 
