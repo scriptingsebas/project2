@@ -50,7 +50,7 @@ public class Main extends Application {
         stage.show();
     }
 
-    private Scene home(Stage stage) {
+    Scene home(Stage stage) {
         int spacing = 13;
         Label title = new Label("RPG BATTLE QUEST");
         Button create = new Button("Create Account");
@@ -223,4 +223,3 @@ public class Main extends Application {
     }
     // TO create scene factory make private Scene scenename(Stage stage)
 }
-
