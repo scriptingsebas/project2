@@ -22,6 +22,9 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 
 public class Main extends Application {
+    private DatabaseManager userDataManager;
+    private UserDAO userDAO;
+
     private static final int SCENE_WIDTH = 430;
     private static final int SCENE_HEIGHT = 720;
     private static final int prefWidth = 200;
@@ -46,8 +49,6 @@ public class Main extends Application {
         launch(args);
     }
 
-    private DatabaseManager userDataManager;
-    private UserDAO userDAO;
 
     @Override
     //main start of the program don't touch.
@@ -57,6 +58,7 @@ public class Main extends Application {
         userDAO = new UserDAO(userDataManager);
 
         stage.setTitle("Battle Quest");
+<<<<<<< sebastian/village-to-mainjava
         stage.setScene(town(stage));
 
         // sets the screen resolution to always be 4:3, and to start off at a decent ish size on first boot (hopefully)
@@ -81,23 +83,14 @@ public class Main extends Application {
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
             stage.setWidth(newVal.doubleValue() * ratio);
         });
+=======
+        stage.setScene(SceneFactory.create(SceneType.HOME, stage, userDAO));
+>>>>>>> master
         stage.show();
     }
 
-    Scene home(Stage stage) {
-        int spacing = 13;
-        Label title = new Label("RPG BATTLE QUEST");
-        Button create = new Button("Create Account");
-        Button login = new Button("Login");
 
-        create.setOnAction(e -> {
-            stage.setScene(registerPage(stage));
-        });
-
-        login.setOnAction(e -> {
-            stage.setScene(logInPage(stage));
-        });
-
+<<<<<<< sebastian/village-to-mainjava
         VBox homePage = new VBox(spacing, title, create, login);
         homePage.setPadding(new Insets(30));
         homePage.setAlignment(Pos.CENTER);
@@ -337,6 +330,8 @@ public class Main extends Application {
     }
 
 
+=======
+>>>>>>> master
     private Scene dungeonStart (Stage stage) {
         int dungeonSpacing = 10;
 
