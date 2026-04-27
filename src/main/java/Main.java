@@ -62,6 +62,7 @@ public class Main extends Application {
         inventoryDAO = new InventoryDAO(userDataManager.getConnection());
 
         stage.setTitle("Battle Quest");
+        stage.setScene(town(stage));
 
         // sets the screen resolution to always be 4:3, and to start off at a decent ish size on first boot (hopefully)
         javafx.geometry.Rectangle2D screenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
@@ -102,6 +103,7 @@ public class Main extends Application {
         login.setOnAction(e -> stage.setScene(logInPage(stage)));
 
         VBox homePage = new VBox(spacing, title, result, create, login);
+        VBox homePage = new VBox(spacing, title, create, login);
         homePage.setPadding(new Insets(30));
         homePage.setAlignment(Pos.CENTER);
 
@@ -395,6 +397,7 @@ public class Main extends Application {
         button.setOnMouseReleased(e -> button.setStyle(hoverStyle));
         return button;
     }
+
 
 
     private Scene dungeonStart (Stage stage) {
