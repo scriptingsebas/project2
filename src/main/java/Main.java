@@ -123,4 +123,3 @@ public class Main extends Application {
     }
     // TO create scene factory make private Scene scenename(Stage stage)
 }
-
