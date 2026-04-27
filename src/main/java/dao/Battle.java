@@ -1,4 +1,4 @@
-package org.turnbasedtitans.project2.model;
+package dao;
 
 /**
  *  Represents a battle record in the game.

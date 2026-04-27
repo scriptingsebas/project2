@@ -1,4 +1,4 @@
-package org.turnbasedtitans.project2.model;
+package dao;
 
 /**
  * [Brief one-sentence description of what this class does.]

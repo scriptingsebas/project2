@@ -1,3 +1,5 @@
+import database.DatabaseManager;
+import database.UserDAO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,18 +12,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    //These are text presets, like they aren't used for anything else aside from setting text
-    private static final int SCENE_WIDTH = 720;
-    private static final int SCENE_HEIGHT = 320;
+    private static final int SCENE_WIDTH = 430;
+    private static final int SCENE_HEIGHT = 720;
     private static final int prefWidth = 200;
-    private static final String TITLETEXT = "Login";
-    private static final String USERTEXT = "Username";
-    private static final String PASSTEXT = "Password";
-    private static final String CREATE = "Register";
-    private static final String REGUSERTEXT = "Username";
-    private static final String REGPASSTEXT = "Password";
-    private static final String VERIFY = "Login";
-    private static final String FAILED = "Password or Username is incorrect!";
 
     //DUNGEON TEXT PRESETS
     private static final String dungeonTitle = "The Dungeon";
@@ -43,9 +36,15 @@ public class Main extends Application {
         launch(args);
     }
 
+    private DatabaseManager userDataManager;
+    private UserDAO userDAO;
+
     @Override
     //main start of the program don't touch.
     public void start(Stage stage) {
+        userDataManager = new DatabaseManager();
+        userDAO = new UserDAO(userDataManager);
+
         stage.setTitle("Battle Quest");
         stage.setScene(home(stage));
         stage.show();
@@ -56,14 +55,13 @@ public class Main extends Application {
         Label title = new Label("RPG BATTLE QUEST");
         Button create = new Button("Create Account");
         Button login = new Button("Login");
-        Label RESULTS = new Label();
 
         create.setOnAction(e -> {
-
+            stage.setScene(registerPage(stage));
         });
 
         login.setOnAction(e -> {
-
+            stage.setScene(logInPage(stage));
         });
 
         VBox homePage = new VBox(spacing, title, create, login);
@@ -72,34 +70,54 @@ public class Main extends Application {
 
         return new Scene(homePage, SCENE_WIDTH, SCENE_HEIGHT);
     }
+
     private Scene registerPage(Stage stage) {
         Label title = new Label("Create  Account");
         TextField username = new TextField();
         TextField password = new TextField();
+        Label result = new Label();
         Button create = new Button("Create Account");
         Button back = new Button("Back");
 
         back.setOnAction(e -> {
             stage.setScene(home(stage));
-
         });
 
         create.setOnAction(e -> {
-            //stage.setScene(town(stage))
+            String user = username.getText().trim();
+            String pass = password.getText().trim();
+
+            if (user.isEmpty() || pass.isEmpty()) {
+                result.setText("Enter username and password.");
+                return;
+            }
+
+            boolean created = userDAO.createUser(user, pass);
+
+            if (created) {
+                result.setText("Account created successfully. this is here because town scene does not exist i will remove later");
+                //stage.setScene(town(stage));
+            } else {
+                result.setText("Username already exists.");
+            }
         });
 
-        VBox general = new VBox(title, username, password, create, back);
+        VBox general = new VBox(title, username, password, result, create, back);
         general.setAlignment(Pos.CENTER);
         general.setPadding(new Insets(30));
         general.setSpacing(15);
+
+        username.setPromptText("Username");
+        password.setPromptText("Password");
 
         return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
     }
 
     private Scene logInPage(Stage stage) {
         Label title = new Label("Log In");
-        TextField username = new TextField("Username");
-        TextField password = new TextField("Password");
+        TextField username = new TextField();
+        TextField password = new TextField();
+        Label result = new Label();
         Button logIn = new Button("log In");
         Button back = new Button("Back");
 
@@ -108,17 +126,32 @@ public class Main extends Application {
         });
 
         logIn.setOnAction(e -> {
-            //stage.setscene(game(stage));
+            String user = username.getText().trim();
+            String pass = password.getText().trim();
+
+            if (user.isEmpty() || pass.isEmpty()) {
+                result.setText("Enter username and password.");
+                return;
+            }
+
+            if (userDAO.loginUser(user, pass)) {
+                result.setText("Logged in successfully. this is here because town scene does not exist I will remove later");
+                //stage.setScene(town(stage));
+            } else {
+                result.setText("Invalid username or password.");
+            }
         });
 
-        VBox general = new VBox(title, username, password, logIn, back);
+        VBox general = new VBox(title, username, password, result, logIn, back);
         general.setAlignment(Pos.CENTER);
         general.setPadding(new Insets(30));
         general.setSpacing(15);
 
+        username.setPromptText("Username");
+        password.setPromptText("Password");
+
         return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
     }
-
     private Scene dungeonStart (Stage stage) {
         int dungeonSpacing = 10;
 
@@ -190,3 +223,4 @@ public class Main extends Application {
     }
     // TO create scene factory make private Scene scenename(Stage stage)
 }
+
