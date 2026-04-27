@@ -1,5 +1,6 @@
 import database.DatabaseManager;
 import database.UserDAO;
+import database.InventoryDAO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,6 +25,8 @@ import javafx.scene.layout.BackgroundSize;
 public class Main extends Application {
     private DatabaseManager userDataManager;
     private UserDAO userDAO;
+    private InventoryDAO inventoryDAO;
+    private String currentUsername;
 
     private static final int SCENE_WIDTH = 430;
     private static final int SCENE_HEIGHT = 720;
@@ -56,9 +59,9 @@ public class Main extends Application {
         Font.loadFont(getClass().getResourceAsStream("/org/turnbasedtitans/project2/fonts/PixelifySans.ttf"), 12);
         userDataManager = new DatabaseManager();
         userDAO = new UserDAO(userDataManager);
+        inventoryDAO = new InventoryDAO(userDataManager.getConnection());
 
         stage.setTitle("Battle Quest");
-<<<<<<< sebastian/village-to-mainjava
         stage.setScene(town(stage));
 
         // sets the screen resolution to always be 4:3, and to start off at a decent ish size on first boot (hopefully)
@@ -83,19 +86,36 @@ public class Main extends Application {
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
             stage.setWidth(newVal.doubleValue() * ratio);
         });
-=======
-        stage.setScene(SceneFactory.create(SceneType.HOME, stage, userDAO));
->>>>>>> master
+        stage.setScene(home(stage));
         stage.show();
     }
 
 
-<<<<<<< sebastian/village-to-mainjava
+    private Scene home(Stage stage) {
+        int spacing = 15;
+
+        Label title = new Label("Battle Quest");
+        Label result = new Label();
+        Button create = new Button("Create Account");
+        Button login = new Button("Log In");
+
+        create.setOnAction(e -> stage.setScene(registerPage(stage)));
+        login.setOnAction(e -> stage.setScene(logInPage(stage)));
+
+        VBox homePage = new VBox(spacing, title, result, create, login);
         VBox homePage = new VBox(spacing, title, create, login);
         homePage.setPadding(new Insets(30));
         homePage.setAlignment(Pos.CENTER);
 
         return new Scene(homePage, SCENE_WIDTH, SCENE_HEIGHT);
+    }
+
+    private Scene home(Stage stage, String message) {
+        Scene scene = home(stage);
+        VBox homePage = (VBox) scene.getRoot();
+        Label result = (Label) homePage.getChildren().get(1);
+        result.setText(message);
+        return scene;
     }
 
     private Scene registerPage(Stage stage) {
@@ -122,7 +142,7 @@ public class Main extends Application {
             boolean created = userDAO.createUser(user, pass);
 
             if (created) {
-                stage.setScene(town(stage));
+                stage.setScene(home(stage, "Account successfully made!"));
             } else {
                 result.setText("Username already exists.");
             }
@@ -161,6 +181,7 @@ public class Main extends Application {
             }
 
             if (userDAO.loginUser(user, pass)) {
+                currentUsername = user;
                 stage.setScene(town(stage));
             } else {
                 result.setText("Invalid username or password.");
@@ -177,6 +198,54 @@ public class Main extends Application {
 
         return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
     }
+    private int getCurrentBattlesWon() {
+        if (currentUsername == null) {
+            return 0;
+        }
+
+        try (java.sql.ResultSet inventory = inventoryDAO.getInventory(currentUsername)) {
+            if (inventory.next()) {
+                return inventory.getInt("battles_won");
+            }
+        } catch (Exception e) {
+            System.err.println("Load battles won failed: " + e.getMessage());
+        }
+
+        return 0;
+    }
+
+    private String getInventoryText(String columnName, String defaultValue) {
+        if (currentUsername == null) {
+            return defaultValue;
+        }
+
+        try (java.sql.ResultSet inventory = inventoryDAO.getInventory(currentUsername)) {
+            if (inventory.next()) {
+                return inventory.getString(columnName);
+            }
+        } catch (Exception e) {
+            System.err.println("Load inventory failed: " + e.getMessage());
+        }
+
+        return defaultValue;
+    }
+
+    private int getInventoryNumber(String columnName, int defaultValue) {
+        if (currentUsername == null) {
+            return defaultValue;
+        }
+
+        try (java.sql.ResultSet inventory = inventoryDAO.getInventory(currentUsername)) {
+            if (inventory.next()) {
+                return inventory.getInt(columnName);
+            }
+        } catch (Exception e) {
+            System.err.println("Load inventory failed: " + e.getMessage());
+        }
+
+        return defaultValue;
+    }
+
     private Scene town(Stage stage) {
         AnchorPane layout = new AnchorPane();
         layout.setStyle("-fx-font-family: 'Pixelify Sans';");
@@ -231,7 +300,7 @@ public class Main extends Application {
         Label battlesText = new Label("Battle's Won -");
         battlesText.setStyle("-fx-font-size: 26px; -fx-text-fill: white;");
 
-        Label battlesValue = new Label("0");
+        Label battlesValue = new Label(String.valueOf(getCurrentBattlesWon()));
         battlesValue.setStyle("-fx-font-size: 26px; -fx-text-fill: yellow;");
 
         HBox battlesWonLabel = new HBox(8, battlesText, battlesValue);
@@ -252,13 +321,13 @@ public class Main extends Application {
         AnchorPane.setLeftAnchor(shopPanel, 520.0);
         shopPanel.setVisible(false);
 
-        Label swordLabel = new Label("Sword: Bronze");
+        Label swordLabel = new Label("Sword: " + getInventoryText("sword", "Bronze"));
         swordLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
 
-        Label armorLabel = new Label("Armor: Bronze");
+        Label armorLabel = new Label("Armor: " + getInventoryText("armor", "Bronze"));
         armorLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
 
-        Label potionLabel = new Label("Healing Potions: 0");
+        Label potionLabel = new Label("Healing Potions: " + getInventoryNumber("healing_potions", 0));
         potionLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
 
         Button inventoryBackButton = shopButton("Back", "");
@@ -330,8 +399,7 @@ public class Main extends Application {
     }
 
 
-=======
->>>>>>> master
+
     private Scene dungeonStart (Stage stage) {
         int dungeonSpacing = 10;
 

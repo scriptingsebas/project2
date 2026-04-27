@@ -27,6 +27,11 @@ public class UserDAO {
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             pstmt.executeUpdate();
+            String inventorySql = "INSERT INTO inventory(username) VALUES(?)";
+            try (PreparedStatement invStmt = connection.prepareStatement(inventorySql)) {
+                invStmt.setString(1, username);
+                invStmt.executeUpdate();
+            }
             return true;
 
         } catch (SQLException e) {
