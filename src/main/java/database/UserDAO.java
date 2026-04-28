@@ -32,6 +32,11 @@ public class UserDAO {
                 invStmt.setString(1, username);
                 invStmt.executeUpdate();
             }
+            String shopSql = "INSERT INTO shop(username) VALUES(?)";
+            try (PreparedStatement shopStmt = connection.prepareStatement(shopSql)) {
+                shopStmt.setString(1, username);
+                shopStmt.executeUpdate();
+            }
             return true;
 
         } catch (SQLException e) {
