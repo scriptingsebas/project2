@@ -103,7 +103,6 @@ public class Main extends Application {
         login.setOnAction(e -> stage.setScene(logInPage(stage)));
 
         VBox homePage = new VBox(spacing, title, result, create, login);
-        VBox homePage = new VBox(spacing, title, create, login);
         homePage.setPadding(new Insets(30));
         homePage.setAlignment(Pos.CENTER);
 
@@ -246,7 +245,222 @@ public class Main extends Application {
         return defaultValue;
     }
 
+    private int getSwordPrice() {
+        if (currentUsername == null) {
+            return 2;
+        }
+
+        String insertSql = "INSERT OR IGNORE INTO shop(username) VALUES(?)";
+        String selectSql = "SELECT sword_price FROM shop WHERE username = ?";
+
+        try (java.sql.PreparedStatement insertStmt = userDataManager.getConnection().prepareStatement(insertSql)) {
+            insertStmt.setString(1, currentUsername);
+            insertStmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Create shop row failed: " + e.getMessage());
+        }
+
+        try (java.sql.PreparedStatement selectStmt = userDataManager.getConnection().prepareStatement(selectSql)) {
+            selectStmt.setString(1, currentUsername);
+            java.sql.ResultSet result = selectStmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("sword_price");
+            }
+        } catch (Exception e) {
+            System.err.println("Load sword price failed: " + e.getMessage());
+        }
+
+        return 2;
+    }
+
+    private int getArmorPrice() {
+        if (currentUsername == null) {
+            return 1;
+        }
+
+        String insertSql = "INSERT OR IGNORE INTO shop(username) VALUES(?)";
+        String selectSql = "SELECT armor_price FROM shop WHERE username = ?";
+
+        try (java.sql.PreparedStatement insertStmt = userDataManager.getConnection().prepareStatement(insertSql)) {
+            insertStmt.setString(1, currentUsername);
+            insertStmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Create shop row failed: " + e.getMessage());
+        }
+
+        try (java.sql.PreparedStatement selectStmt = userDataManager.getConnection().prepareStatement(selectSql)) {
+            selectStmt.setString(1, currentUsername);
+            java.sql.ResultSet result = selectStmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("armor_price");
+            }
+        } catch (Exception e) {
+            System.err.println("Load armor price failed: " + e.getMessage());
+        }
+
+        return 1;
+    }
+
+    private int getHealingPrice() {
+        if (currentUsername == null) {
+            return 1;
+        }
+
+        String insertSql = "INSERT OR IGNORE INTO shop(username) VALUES(?)";
+        String selectSql = "SELECT healing_price FROM shop WHERE username = ?";
+
+        try (java.sql.PreparedStatement insertStmt = userDataManager.getConnection().prepareStatement(insertSql)) {
+            insertStmt.setString(1, currentUsername);
+            insertStmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Create shop row failed: " + e.getMessage());
+        }
+
+        try (java.sql.PreparedStatement selectStmt = userDataManager.getConnection().prepareStatement(selectSql)) {
+            selectStmt.setString(1, currentUsername);
+            java.sql.ResultSet result = selectStmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("healing_price");
+            }
+        } catch (Exception e) {
+            System.err.println("Load healing price failed: " + e.getMessage());
+        }
+
+        return 1;
+    }
+
+    private void buySword(Stage stage) {
+        if (currentUsername == null) {
+            return;
+        }
+
+        String currentSword = getInventoryText("sword", "Bronze");
+        if (currentSword.equals("Diamond")) {
+            return;
+        }
+
+        int swordPrice = getSwordPrice();
+        int battlesWon = getCurrentBattlesWon();
+
+        if (battlesWon < swordPrice) {
+            return;
+        }
+
+        String nextSword = currentSword.equals("Bronze") ? "Iron" : "Diamond";
+        String inventorySql = "UPDATE inventory SET sword = ? WHERE username = ?";
+        String shopSql = "UPDATE shop SET sword_price = sword_price + 2 WHERE username = ?";
+
+        try (java.sql.PreparedStatement inventoryStmt = userDataManager.getConnection().prepareStatement(inventorySql);
+             java.sql.PreparedStatement shopStmt = userDataManager.getConnection().prepareStatement(shopSql)) {
+            inventoryStmt.setString(1, nextSword);
+            inventoryStmt.setString(2, currentUsername);
+            inventoryStmt.executeUpdate();
+
+            shopStmt.setString(1, currentUsername);
+            shopStmt.executeUpdate();
+
+            stage.setScene(town(stage));
+        } catch (Exception e) {
+            System.err.println("Buy sword failed: " + e.getMessage());
+        }
+    }
+
+    private void buyArmor(Stage stage) {
+        if (currentUsername == null) {
+            return;
+        }
+
+        String currentArmor = getInventoryText("armor", "Bronze");
+        if (currentArmor.equals("Diamond")) {
+            return;
+        }
+
+        int armorPrice = getArmorPrice();
+        int battlesWon = getCurrentBattlesWon();
+
+        if (battlesWon < armorPrice) {
+            return;
+        }
+
+        String nextArmor = currentArmor.equals("Bronze") ? "Iron" : "Diamond";
+        String inventorySql = "UPDATE inventory SET armor = ? WHERE username = ?";
+        String shopSql = "UPDATE shop SET armor_price = armor_price + 1 WHERE username = ?";
+
+        try (java.sql.PreparedStatement inventoryStmt = userDataManager.getConnection().prepareStatement(inventorySql);
+             java.sql.PreparedStatement shopStmt = userDataManager.getConnection().prepareStatement(shopSql)) {
+            inventoryStmt.setString(1, nextArmor);
+            inventoryStmt.setString(2, currentUsername);
+            inventoryStmt.executeUpdate();
+
+            shopStmt.setString(1, currentUsername);
+            shopStmt.executeUpdate();
+
+            stage.setScene(town(stage));
+        } catch (Exception e) {
+            System.err.println("Buy armor failed: " + e.getMessage());
+        }
+    }
+
+    private void buyHealingPotion(Stage stage) {
+        if (currentUsername == null) {
+            return;
+        }
+
+        int currentPotions = getInventoryNumber("healing_potions", 0);
+        if (currentPotions >= 3) {
+            stage.setScene(town(stage, "Max 3 potions."));
+            return;
+        }
+
+        int healingPrice = getHealingPrice();
+        int battlesWon = getCurrentBattlesWon();
+
+        if (battlesWon < healingPrice) {
+            return;
+        }
+
+        String inventorySql = "UPDATE inventory SET healing_potions = healing_potions + 1 WHERE username = ?";
+
+        try (java.sql.PreparedStatement inventoryStmt = userDataManager.getConnection().prepareStatement(inventorySql)) {
+            inventoryStmt.setString(1, currentUsername);
+            inventoryStmt.executeUpdate();
+
+            stage.setScene(town(stage));
+        } catch (Exception e) {
+            System.err.println("Buy healing potion failed: " + e.getMessage());
+        }
+    }
+
+    private String itemColor(String itemName) {
+        if (itemName.equals("Bronze")) {
+            return "#CD7F32";
+        }
+        if (itemName.equals("Iron")) {
+            return "white";
+        }
+        if (itemName.equals("Diamond")) {
+            return "#00BFFF";
+        }
+        return "white";
+    }
+
+    private HBox inventoryItemLabel(String labelText, String itemName) {
+        Label nameLabel = new Label(labelText + ": ");
+        nameLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
+
+        Label itemLabel = new Label(itemName);
+        itemLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: " + itemColor(itemName) + ";");
+
+        HBox row = new HBox(nameLabel, itemLabel);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
+    }
+
     private Scene town(Stage stage) {
+        return town(stage, "");
+    }
+
+    private Scene town(Stage stage, String shopMessage) {
         AnchorPane layout = new AnchorPane();
         layout.setStyle("-fx-font-family: 'Pixelify Sans';");
         Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/village/village-bg.jpg").toExternalForm());
@@ -297,6 +511,9 @@ public class Main extends Application {
         Label shopTitle = new Label("SHOP");
         shopTitle.setStyle("-fx-font-size: 38px; -fx-text-fill: white;");
 
+        Label shopError = new Label(shopMessage);
+        shopError.setStyle("-fx-font-size: 20px; -fx-text-fill: red;");
+
         Label battlesText = new Label("Battle's Won -");
         battlesText.setStyle("-fx-font-size: 26px; -fx-text-fill: white;");
 
@@ -306,12 +523,16 @@ public class Main extends Application {
         HBox battlesWonLabel = new HBox(8, battlesText, battlesValue);
         battlesWonLabel.setAlignment(Pos.CENTER);
 
-        Button armorButton = shopButton("Armor Upgrade -", "1");
-        Button swordButton = shopButton("Sword Upgrade -", "2");
-        Button healingButton = shopButton("Healing -", "1");
+        Button armorButton = getInventoryText("armor", "Bronze").equals("Diamond")
+                ? shopButton("Armor", "Maxed Out")
+                : shopButton("Armor Upgrade -", String.valueOf(getArmorPrice()));
+        Button swordButton = getInventoryText("sword", "Bronze").equals("Diamond")
+                ? shopButton("Sword", "Maxed Out")
+                : shopButton("Sword Upgrade -", String.valueOf(getSwordPrice()));
+        Button healingButton = shopButton("Healing -", String.valueOf(getHealingPrice()));
         Button backButton = shopButton("Back", "");
 
-        VBox shopPanel = new VBox(18, shopTitle, battlesWonLabel, armorButton, swordButton, healingButton, backButton);
+        VBox shopPanel = new VBox(18, shopTitle, shopError, battlesWonLabel, armorButton, swordButton, healingButton, backButton);
         shopPanel.setAlignment(Pos.TOP_CENTER);
         shopPanel.setPrefSize(350, 420);
         shopPanel.setMaxHeight(420);
@@ -321,11 +542,8 @@ public class Main extends Application {
         AnchorPane.setLeftAnchor(shopPanel, 520.0);
         shopPanel.setVisible(false);
 
-        Label swordLabel = new Label("Sword: " + getInventoryText("sword", "Bronze"));
-        swordLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
-
-        Label armorLabel = new Label("Armor: " + getInventoryText("armor", "Bronze"));
-        armorLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
+        HBox swordLabel = inventoryItemLabel("Sword", getInventoryText("sword", "Bronze"));
+        HBox armorLabel = inventoryItemLabel("Armor", getInventoryText("armor", "Bronze"));
 
         Label potionLabel = new Label("Healing Potions: " + getInventoryNumber("healing_potions", 0));
         potionLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
@@ -353,6 +571,9 @@ public class Main extends Application {
             shopPanel.setVisible(true);
         });
         fightButton.setOnAction(e -> stage.setScene(dungeonStart(stage)));
+        armorButton.setOnAction(e -> buyArmor(stage));
+        swordButton.setOnAction(e -> buySword(stage));
+        healingButton.setOnAction(e -> buyHealingPotion(stage));
         backButton.setOnAction(e -> {
             shopPanel.setVisible(false);
             mainPanel.setVisible(true);
