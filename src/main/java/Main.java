@@ -16,6 +16,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -31,6 +38,11 @@ public class Main extends Application {
     private static final int SCENE_WIDTH = 430;
     private static final int SCENE_HEIGHT = 720;
     private static final int prefWidth = 200;
+    // Sprite animation settings
+    private static final double FRAME_WIDTH = 100;
+    private static final double FRAME_HEIGHT = 55;
+    private static final int IDLE_FRAMES = 8;
+    private static final double SPRITE_SCALE = 7;
 
     //DUNGEON TEXT PRESETS
     private static final String dungeonTitle = "The Dungeon";
@@ -555,7 +567,7 @@ public class Main extends Application {
     private Scene town(Stage stage, String shopMessage) {
         AnchorPane layout = new AnchorPane();
         layout.setStyle("-fx-font-family: 'Pixelify Sans';");
-        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/village/animatedtown.gif").toExternalForm());
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/village/animatedtown-crop-2.gif").toExternalForm());
         BackgroundImage bg = new BackgroundImage(
                 bgImage,
                 BackgroundRepeat.NO_REPEAT,
@@ -587,6 +599,29 @@ public class Main extends Application {
         AnchorPane.setTopAnchor(healthContainer, 85.0);
         AnchorPane.setLeftAnchor(healthContainer, 15.0);
         AnchorPane.setRightAnchor(healthContainer, 15.0);
+
+        Image heroImage = new Image(getClass().getResourceAsStream("/org/turnbasedtitans/project2/characters/HeroKnight.png"));
+        Canvas hero = new Canvas(FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE);
+        GraphicsContext heroGraphics = hero.getGraphicsContext2D();
+        heroGraphics.setImageSmoothing(false);
+        heroGraphics.drawImage(heroImage, 0, 0, FRAME_WIDTH, FRAME_HEIGHT, 0, 0, FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE);
+
+        final int[] heroFrame = {0};
+        Timeline heroAnimation = new Timeline(new KeyFrame(Duration.millis(150), e -> {
+            heroFrame[0] = (heroFrame[0] + 1) % IDLE_FRAMES;
+            heroGraphics.clearRect(0, 0, hero.getWidth(), hero.getHeight());
+            heroGraphics.drawImage(heroImage,
+                    heroFrame[0] * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT,
+                    0, 0, FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE);
+        }));
+        heroAnimation.setCycleCount(Animation.INDEFINITE);
+        heroAnimation.play();
+
+        VBox heroBox = new VBox(hero);
+        heroBox.setAlignment(Pos.CENTER);
+        AnchorPane.setLeftAnchor(heroBox, -40.0);
+        AnchorPane.setTopAnchor(heroBox, 120.0);
+        AnchorPane.setBottomAnchor(heroBox, 40.0);
 
         Button inventoryButton = shopButton("Inventory", "");
         Button shopButton = shopButton("Shop", "");
@@ -675,7 +710,7 @@ public class Main extends Application {
             mainPanel.setVisible(true);
         });
 
-        layout.getChildren().addAll(title, healthContainer, mainPanel, shopPanel, inventoryPanel);
+        layout.getChildren().addAll(title, healthContainer, heroBox, mainPanel, shopPanel, inventoryPanel);
         return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
 
