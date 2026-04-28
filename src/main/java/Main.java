@@ -61,8 +61,7 @@ public class Main extends Application {
         userDAO = new UserDAO(userDataManager);
         inventoryDAO = new InventoryDAO(userDataManager.getConnection());
 
-        stage.setTitle("Battle Quest");
-        stage.setScene(town(stage));
+        stage.setTitle("RPG Battle Quest");
 
         // sets the screen resolution to always be 4:3, and to start off at a decent ish size on first boot (hopefully)
         javafx.geometry.Rectangle2D screenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
@@ -94,24 +93,47 @@ public class Main extends Application {
     private Scene home(Stage stage) {
         int spacing = 15;
 
-        Label title = new Label("Battle Quest");
+        Label title = new Label("RPG Battle Quest");
         Label result = new Label();
-        Button create = new Button("Create Account");
-        Button login = new Button("Log In");
+        Button create = shopButton("Create Account", "");
+        Button login = shopButton("Log In", "");
 
         create.setOnAction(e -> stage.setScene(registerPage(stage)));
         login.setOnAction(e -> stage.setScene(logInPage(stage)));
 
+        title.setText("RPG BATTLE QUEST");
+        title.setStyle("-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: white;");
+        result.setStyle("-fx-font-size: 18px; -fx-text-fill: yellow;");
+
         VBox homePage = new VBox(spacing, title, result, create, login);
         homePage.setPadding(new Insets(30));
         homePage.setAlignment(Pos.CENTER);
+        homePage.setMaxWidth(350);
+        homePage.setStyle("-fx-background-color: rgba(10, 73, 108, 0.75); -fx-border-color: #0A496C; -fx-border-width: 3px;");
 
-        return new Scene(homePage, SCENE_WIDTH, SCENE_HEIGHT);
+        AnchorPane layout = new AnchorPane();
+        layout.setStyle("-fx-font-family: 'Pixelify Sans';");
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/titlescreen/nighttime.gif").toExternalForm());
+        BackgroundImage bg = new BackgroundImage(
+                bgImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true)
+        );
+        layout.setBackground(new Background(bg));
+        layout.getChildren().add(homePage);
+        AnchorPane.setTopAnchor(homePage, 190.0);
+        AnchorPane.setLeftAnchor(homePage, 40.0);
+        AnchorPane.setRightAnchor(homePage, 40.0);
+
+        return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
 
     private Scene home(Stage stage, String message) {
         Scene scene = home(stage);
-        VBox homePage = (VBox) scene.getRoot();
+        AnchorPane layout = (AnchorPane) scene.getRoot();
+        VBox homePage = (VBox) layout.getChildren().get(0);
         Label result = (Label) homePage.getChildren().get(1);
         result.setText(message);
         return scene;
@@ -122,8 +144,13 @@ public class Main extends Application {
         TextField username = new TextField();
         TextField password = new TextField();
         Label result = new Label();
-        Button create = new Button("Create Account");
-        Button back = new Button("Back");
+        Button create = shopButton("Create Account", "");
+        Button back = shopButton("Back", "");
+
+        create.setPrefHeight(55);
+        back.setPrefHeight(55);
+        create.setMaxWidth(380);
+        back.setMaxWidth(220);
 
         back.setOnAction(e -> {
             stage.setScene(home(stage));
@@ -147,15 +174,45 @@ public class Main extends Application {
             }
         });
 
-        VBox general = new VBox(title, username, password, result, create, back);
-        general.setAlignment(Pos.CENTER);
-        general.setPadding(new Insets(30));
-        general.setSpacing(15);
+        title.setText("REGISTER");
+        title.setStyle("-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: white;");
 
         username.setPromptText("Username");
         password.setPromptText("Password");
+        username.setMaxWidth(380);
+        password.setMaxWidth(380);
+        username.setPrefHeight(55);
+        password.setPrefHeight(55);
+        username.setStyle("-fx-font-size: 22px;");
+        password.setStyle("-fx-font-size: 22px;");
+        result.setStyle("-fx-font-size: 18px; -fx-text-fill: red;");
 
-        return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
+        VBox fieldSection = new VBox(15, username, password, create, result);
+        fieldSection.setAlignment(Pos.CENTER);
+
+        VBox registerPanel = new VBox(30, title, fieldSection, back);
+        registerPanel.setAlignment(Pos.CENTER);
+        registerPanel.setPadding(new Insets(30));
+        registerPanel.setMaxWidth(430);
+        registerPanel.setStyle("-fx-background-color: rgba(10, 73, 108, 0.75); -fx-border-color: #0A496C; -fx-border-width: 3px;");
+
+        AnchorPane layout = new AnchorPane();
+        layout.setStyle("-fx-font-family: 'Pixelify Sans';");
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/titlescreen/nighttime.gif").toExternalForm());
+        BackgroundImage bg = new BackgroundImage(
+                bgImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true)
+        );
+        layout.setBackground(new Background(bg));
+        layout.getChildren().add(registerPanel);
+        AnchorPane.setTopAnchor(registerPanel, 160.0);
+        AnchorPane.setLeftAnchor(registerPanel, 40.0);
+        AnchorPane.setRightAnchor(registerPanel, 40.0);
+
+        return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
 
     private Scene logInPage(Stage stage) {
@@ -163,8 +220,13 @@ public class Main extends Application {
         TextField username = new TextField();
         TextField password = new TextField();
         Label result = new Label();
-        Button logIn = new Button("log In");
-        Button back = new Button("Back");
+        Button logIn = shopButton("Log In", "");
+        Button back = shopButton("Back", "");
+
+        logIn.setPrefHeight(55);
+        back.setPrefHeight(55);
+        logIn.setMaxWidth(380);
+        back.setMaxWidth(220);
 
         back.setOnAction(e -> {
             stage.setScene(home(stage));
@@ -187,15 +249,45 @@ public class Main extends Application {
             }
         });
 
-        VBox general = new VBox(title, username, password, result, logIn, back);
-        general.setAlignment(Pos.CENTER);
-        general.setPadding(new Insets(30));
-        general.setSpacing(15);
+        title.setText("LOG IN");
+        title.setStyle("-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: white;");
 
         username.setPromptText("Username");
         password.setPromptText("Password");
+        username.setMaxWidth(380);
+        password.setMaxWidth(380);
+        username.setPrefHeight(55);
+        password.setPrefHeight(55);
+        username.setStyle("-fx-font-size: 22px;");
+        password.setStyle("-fx-font-size: 22px;");
+        result.setStyle("-fx-font-size: 18px; -fx-text-fill: red;");
 
-        return new Scene(general, SCENE_WIDTH, SCENE_HEIGHT);
+        VBox fieldSection = new VBox(15, username, password, logIn, result);
+        fieldSection.setAlignment(Pos.CENTER);
+
+        VBox loginPanel = new VBox(30, title, fieldSection, back);
+        loginPanel.setAlignment(Pos.CENTER);
+        loginPanel.setPadding(new Insets(30));
+        loginPanel.setMaxWidth(430);
+        loginPanel.setStyle("-fx-background-color: rgba(10, 73, 108, 0.75); -fx-border-color: #0A496C; -fx-border-width: 3px;");
+
+        AnchorPane layout = new AnchorPane();
+        layout.setStyle("-fx-font-family: 'Pixelify Sans';");
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/titlescreen/nighttime.gif").toExternalForm());
+        BackgroundImage bg = new BackgroundImage(
+                bgImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true)
+        );
+        layout.setBackground(new Background(bg));
+        layout.getChildren().add(loginPanel);
+        AnchorPane.setTopAnchor(loginPanel, 160.0);
+        AnchorPane.setLeftAnchor(loginPanel, 40.0);
+        AnchorPane.setRightAnchor(loginPanel, 40.0);
+
+        return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
     private int getCurrentBattlesWon() {
         if (currentUsername == null) {
@@ -463,7 +555,7 @@ public class Main extends Application {
     private Scene town(Stage stage, String shopMessage) {
         AnchorPane layout = new AnchorPane();
         layout.setStyle("-fx-font-family: 'Pixelify Sans';");
-        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/village/village-bg.jpg").toExternalForm());
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/village/animatedtown.gif").toExternalForm());
         BackgroundImage bg = new BackgroundImage(
                 bgImage,
                 BackgroundRepeat.NO_REPEAT,
