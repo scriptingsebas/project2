@@ -50,8 +50,31 @@ public class DatabaseManager {
             );
         """;
 
+        String inventorySql = """
+            CREATE TABLE IF NOT EXISTS inventory (
+                username TEXT PRIMARY KEY,
+                sword TEXT DEFAULT 'Bronze',
+                armor TEXT DEFAULT 'Bronze',
+                healing_potions INTEGER DEFAULT 0,
+                battles_won INTEGER DEFAULT 0,
+                FOREIGN KEY(username) REFERENCES users(username)
+            );
+        """;
+
+        String shopSql = """
+            CREATE TABLE IF NOT EXISTS shop (
+                username TEXT PRIMARY KEY,
+                sword_price INTEGER DEFAULT 2,
+                armor_price INTEGER DEFAULT 1,
+                healing_price INTEGER DEFAULT 1,
+                FOREIGN KEY(username) REFERENCES users(username)
+            );
+        """;
+
         try (Statement stmt = connecter.createStatement()) {
             stmt.execute(sql);
+            stmt.execute(inventorySql);
+            stmt.execute(shopSql);
         } catch (SQLException e) {
             System.err.println ("makeDatabase failed : " + e.getMessage()) ;
         }
