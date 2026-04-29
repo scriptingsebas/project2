@@ -681,7 +681,7 @@ public class Main extends Application {
             mainPanel.setVisible(false);
             shopPanel.setVisible(true);
         });
-        fightButton.setOnAction(e -> stage.setScene(dungeonStart(stage)));
+        //fightButton.setOnAction(e -> stage.setScene(dungeonStart(stage)));
         armorButton.setOnAction(e -> buyArmor(stage));
         swordButton.setOnAction(e -> buySword(stage));
         healingButton.setOnAction(e -> buyHealingPotion(stage));
