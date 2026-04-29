@@ -1,5 +1,8 @@
 public enum SceneType {
     HOME,
-    REGISTERPG,
+    REGISTER,
     LOGIN,
+    TOWN,
+    DUNGEON_START,
+    DUNGEON_FIGHT
 }
