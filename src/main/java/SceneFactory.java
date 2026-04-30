@@ -1,4 +1,5 @@
 import database.InventoryDAO;
+import controller.TownController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -31,6 +32,7 @@ import javafx.stage.Stage;
 public class SceneFactory {
     private final DatabaseManager userDataManager;
     private final InventoryDAO inventoryDAO;
+    private final TownController townController;
     private String currentUsername;
 
     private static final double FRAME_WIDTH = 100;
@@ -41,6 +43,7 @@ public class SceneFactory {
     public SceneFactory(DatabaseManager userDataManager, InventoryDAO inventoryDAO) {
         this.userDataManager = userDataManager;
         this.inventoryDAO = inventoryDAO;
+        this.townController = new TownController(userDataManager, inventoryDAO);
     }
     private static final int SCENE_WIDTH = 430;
     private static final int SCENE_HEIGHT = 720;
@@ -315,269 +318,24 @@ public class SceneFactory {
 
     public Scene town(Stage stage, String username) {
         currentUsername = username;
-        return townWithMessage(stage, "");
+        townController.setCurrentUsername(username);
+        return townUI(stage, "");
     }
 
-    private int getCurrentBattlesWon() {
-        if (currentUsername == null) {
-            return 0;
-        }
-
-        try (java.sql.ResultSet inventory = inventoryDAO.getInventory(currentUsername)) {
-            if (inventory.next()) {
-                return inventory.getInt("battles_won");
-            }
-        } catch (Exception e) {
-            System.err.println("Load battles won failed: " + e.getMessage());
-        }
-
-        return 0;
-    }
-
-    private String getInventoryText(String columnName, String defaultValue) {
-        if (currentUsername == null) {
-            return defaultValue;
-        }
-
-        try (java.sql.ResultSet inventory = inventoryDAO.getInventory(currentUsername)) {
-            if (inventory.next()) {
-                return inventory.getString(columnName);
-            }
-        } catch (Exception e) {
-            System.err.println("Load inventory failed: " + e.getMessage());
-        }
-
-        return defaultValue;
-    }
-
-    private int getInventoryNumber(String columnName, int defaultValue) {
-        if (currentUsername == null) {
-            return defaultValue;
-        }
-
-        try (java.sql.ResultSet inventory = inventoryDAO.getInventory(currentUsername)) {
-            if (inventory.next()) {
-                return inventory.getInt(columnName);
-            }
-        } catch (Exception e) {
-            System.err.println("Load inventory failed: " + e.getMessage());
-        }
-
-        return defaultValue;
-    }
-
-    private int getSwordPrice() {
-        if (currentUsername == null) {
-            return 2;
-        }
-
-        String insertSql = "INSERT OR IGNORE INTO shop(username) VALUES(?)";
-        String selectSql = "SELECT sword_price FROM shop WHERE username = ?";
-
-        try (java.sql.PreparedStatement insertStmt = userDataManager.getConnection().prepareStatement(insertSql)) {
-            insertStmt.setString(1, currentUsername);
-            insertStmt.executeUpdate();
-        } catch (Exception e) {
-            System.err.println("Create shop row failed: " + e.getMessage());
-        }
-
-        try (java.sql.PreparedStatement selectStmt = userDataManager.getConnection().prepareStatement(selectSql)) {
-            selectStmt.setString(1, currentUsername);
-            java.sql.ResultSet result = selectStmt.executeQuery();
-            if (result.next()) {
-                return result.getInt("sword_price");
-            }
-        } catch (Exception e) {
-            System.err.println("Load sword price failed: " + e.getMessage());
-        }
-
-        return 2;
-    }
-
-    private int getArmorPrice() {
-        if (currentUsername == null) {
-            return 1;
-        }
-
-        String insertSql = "INSERT OR IGNORE INTO shop(username) VALUES(?)";
-        String selectSql = "SELECT armor_price FROM shop WHERE username = ?";
-
-        try (java.sql.PreparedStatement insertStmt = userDataManager.getConnection().prepareStatement(insertSql)) {
-            insertStmt.setString(1, currentUsername);
-            insertStmt.executeUpdate();
-        } catch (Exception e) {
-            System.err.println("Create shop row failed: " + e.getMessage());
-        }
-
-        try (java.sql.PreparedStatement selectStmt = userDataManager.getConnection().prepareStatement(selectSql)) {
-            selectStmt.setString(1, currentUsername);
-            java.sql.ResultSet result = selectStmt.executeQuery();
-            if (result.next()) {
-                return result.getInt("armor_price");
-            }
-        } catch (Exception e) {
-            System.err.println("Load armor price failed: " + e.getMessage());
-        }
-
-        return 1;
-    }
-
-    private int getHealingPrice() {
-        if (currentUsername == null) {
-            return 1;
-        }
-
-        String insertSql = "INSERT OR IGNORE INTO shop(username) VALUES(?)";
-        String selectSql = "SELECT healing_price FROM shop WHERE username = ?";
-
-        try (java.sql.PreparedStatement insertStmt = userDataManager.getConnection().prepareStatement(insertSql)) {
-            insertStmt.setString(1, currentUsername);
-            insertStmt.executeUpdate();
-        } catch (Exception e) {
-            System.err.println("Create shop row failed: " + e.getMessage());
-        }
-
-        try (java.sql.PreparedStatement selectStmt = userDataManager.getConnection().prepareStatement(selectSql)) {
-            selectStmt.setString(1, currentUsername);
-            java.sql.ResultSet result = selectStmt.executeQuery();
-            if (result.next()) {
-                return result.getInt("healing_price");
-            }
-        } catch (Exception e) {
-            System.err.println("Load healing price failed: " + e.getMessage());
-        }
-
-        return 1;
-    }
-
-    private void buySword(Stage stage) {
-        if (currentUsername == null) {
-            return;
-        }
-
-        String currentSword = getInventoryText("sword", "Bronze");
-        if (currentSword.equals("Diamond")) {
-            return;
-        }
-
-        int swordPrice = getSwordPrice();
-        int battlesWon = getCurrentBattlesWon();
-
-        if (battlesWon < swordPrice) {
-            return;
-        }
-
-        String nextSword = currentSword.equals("Bronze") ? "Iron" : "Diamond";
-        String inventorySql = "UPDATE inventory SET sword = ? WHERE username = ?";
-        String shopSql = "UPDATE shop SET sword_price = sword_price + 2 WHERE username = ?";
-
-        try (java.sql.PreparedStatement inventoryStmt = userDataManager.getConnection().prepareStatement(inventorySql);
-             java.sql.PreparedStatement shopStmt = userDataManager.getConnection().prepareStatement(shopSql)) {
-            inventoryStmt.setString(1, nextSword);
-            inventoryStmt.setString(2, currentUsername);
-            inventoryStmt.executeUpdate();
-
-            shopStmt.setString(1, currentUsername);
-            shopStmt.executeUpdate();
-
-            stage.setScene(townWithMessage(stage, ""));
-        } catch (Exception e) {
-            System.err.println("Buy sword failed: " + e.getMessage());
-        }
-    }
-
-    private void buyArmor(Stage stage) {
-        if (currentUsername == null) {
-            return;
-        }
-
-        String currentArmor = getInventoryText("armor", "Bronze");
-        if (currentArmor.equals("Diamond")) {
-            return;
-        }
-
-        int armorPrice = getArmorPrice();
-        int battlesWon = getCurrentBattlesWon();
-
-        if (battlesWon < armorPrice) {
-            return;
-        }
-
-        String nextArmor = currentArmor.equals("Bronze") ? "Iron" : "Diamond";
-        String inventorySql = "UPDATE inventory SET armor = ? WHERE username = ?";
-        String shopSql = "UPDATE shop SET armor_price = armor_price + 1 WHERE username = ?";
-
-        try (java.sql.PreparedStatement inventoryStmt = userDataManager.getConnection().prepareStatement(inventorySql);
-             java.sql.PreparedStatement shopStmt = userDataManager.getConnection().prepareStatement(shopSql)) {
-            inventoryStmt.setString(1, nextArmor);
-            inventoryStmt.setString(2, currentUsername);
-            inventoryStmt.executeUpdate();
-
-            shopStmt.setString(1, currentUsername);
-            shopStmt.executeUpdate();
-
-            stage.setScene(townWithMessage(stage, ""));
-        } catch (Exception e) {
-            System.err.println("Buy armor failed: " + e.getMessage());
-        }
-    }
-
-    private void buyHealingPotion(Stage stage) {
-        if (currentUsername == null) {
-            return;
-        }
-
-        int currentPotions = getInventoryNumber("healing_potions", 0);
-        if (currentPotions >= 3) {
-            stage.setScene(townWithMessage(stage, "Max 3 potions."));
-            return;
-        }
-
-        int healingPrice = getHealingPrice();
-        int battlesWon = getCurrentBattlesWon();
-
-        if (battlesWon < healingPrice) {
-            return;
-        }
-
-        String inventorySql = "UPDATE inventory SET healing_potions = healing_potions + 1 WHERE username = ?";
-
-        try (java.sql.PreparedStatement inventoryStmt = userDataManager.getConnection().prepareStatement(inventorySql)) {
-            inventoryStmt.setString(1, currentUsername);
-            inventoryStmt.executeUpdate();
-
-            stage.setScene(townWithMessage(stage, ""));
-        } catch (Exception e) {
-            System.err.println("Buy healing potion failed: " + e.getMessage());
-        }
-    }
-
-    private String itemColor(String itemName) {
-        if (itemName.equals("Bronze")) {
-            return "#CD7F32";
-        }
-        if (itemName.equals("Iron")) {
-            return "white";
-        }
-        if (itemName.equals("Diamond")) {
-            return "#00BFFF";
-        }
-        return "white";
-    }
 
     private HBox inventoryItemLabel(String labelText, String itemName) {
         Label nameLabel = new Label(labelText + ": ");
         nameLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
 
         Label itemLabel = new Label(itemName);
-        itemLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: " + itemColor(itemName) + ";");
+        itemLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: " + townController.itemColor(itemName) + ";");
 
         HBox row = new HBox(nameLabel, itemLabel);
         row.setAlignment(Pos.CENTER_LEFT);
         return row;
     }
 
-    private Scene townWithMessage(Stage stage, String shopMessage) {
+    private Scene townUI(Stage stage, String shopMessage) {
         AnchorPane layout = new AnchorPane();
         layout.setStyle("-fx-font-family: 'Pixelify Sans';");
         Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/village/animatedtown-crop-2.gif").toExternalForm());
@@ -657,38 +415,42 @@ public class SceneFactory {
         Label battlesText = new Label("Battle's Won -");
         battlesText.setStyle("-fx-font-size: 26px; -fx-text-fill: white;");
 
-        Label battlesValue = new Label(String.valueOf(getCurrentBattlesWon()));
+        Label battlesValue = new Label(String.valueOf(townController.getCurrentBattlesWon()));
         battlesValue.setStyle("-fx-font-size: 26px; -fx-text-fill: yellow;");
 
         HBox battlesWonLabel = new HBox(8, battlesText, battlesValue);
         battlesWonLabel.setAlignment(Pos.CENTER);
 
-        Button armorButton = getInventoryText("armor", "Bronze").equals("Diamond")
+        Button armorButton = townController.getInventoryText("armor", "Bronze").equals("Diamond")
                 ? shopButton("Armor", "Maxed Out")
-                : shopButton("Armor Upgrade -", String.valueOf(getArmorPrice()));
-        Button swordButton = getInventoryText("sword", "Bronze").equals("Diamond")
+                : shopButton("Armor Upgrade -", String.valueOf(townController.getArmorPrice()));
+        Button swordButton = townController.getInventoryText("sword", "Bronze").equals("Diamond")
                 ? shopButton("Sword", "Maxed Out")
-                : shopButton("Sword Upgrade -", String.valueOf(getSwordPrice()));
-        Button healingButton = shopButton("Healing -", String.valueOf(getHealingPrice()));
+                : shopButton("Sword Upgrade -", String.valueOf(townController.getSwordPrice()));
+        Button healingButton = shopButton("Healing -", String.valueOf(townController.getHealingPrice()));
+        final Button[] armorButtonRef = {armorButton};
+        final Button[] swordButtonRef = {swordButton};
+        final Button[] healingButtonRef = {healingButton};
         Button backButton = shopButton("Back", "");
 
         VBox shopPanel = new VBox(18, shopTitle, shopError, battlesWonLabel, armorButton, swordButton, healingButton, backButton);
         shopPanel.setAlignment(Pos.TOP_CENTER);
-        shopPanel.setPrefSize(350, 420);
-        shopPanel.setMaxHeight(420);
+        shopPanel.setPrefSize(350, 460);
+        shopPanel.setMaxHeight(460);
         shopPanel.setPadding(new Insets(28, 18, 18, 18));
         shopPanel.setStyle("-fx-background-color: rgba(10, 73, 108, 0.75); -fx-border-color: #0A496C; -fx-border-width: 3px;");
-        AnchorPane.setTopAnchor(shopPanel, 160.0);
+        AnchorPane.setTopAnchor(shopPanel, 140.0);
         AnchorPane.setLeftAnchor(shopPanel, 520.0);
         shopPanel.setVisible(false);
 
-        HBox swordLabel = inventoryItemLabel("Sword", getInventoryText("sword", "Bronze"));
-        HBox armorLabel = inventoryItemLabel("Armor", getInventoryText("armor", "Bronze"));
+        HBox swordLabel = inventoryItemLabel("Sword", townController.getInventoryText("sword", "Bronze"));
+        HBox armorLabel = inventoryItemLabel("Armor", townController.getInventoryText("armor", "Bronze"));
 
-        Label potionLabel = new Label("Healing Potions: " + getInventoryNumber("healing_potions", 0));
+        Label potionLabel = new Label("Healing Potions: " + townController.getInventoryNumber("healing_potions", 0));
         potionLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
 
         Button inventoryBackButton = shopButton("Back", "");
+        VBox.setMargin(inventoryBackButton, new Insets(30, 0, 0, 0));
 
         Separator sep1 = new Separator();
         Separator sep2 = new Separator();
@@ -711,9 +473,50 @@ public class SceneFactory {
             shopPanel.setVisible(true);
         });
         fightButton.setOnAction(e -> stage.setScene(dungeonStart(stage)));
-        armorButton.setOnAction(e -> buyArmor(stage));
-        swordButton.setOnAction(e -> buySword(stage));
-        healingButton.setOnAction(e -> buyHealingPotion(stage));
+        armorButton.setOnAction(e -> {
+            if (townController.buyArmor()) {
+                armorLabel.getChildren().set(1, new Label(townController.getInventoryText("armor", "Bronze")));
+                ((Label) armorLabel.getChildren().get(1)).setStyle("-fx-font-size: 28px; -fx-text-fill: " + townController.itemColor(townController.getInventoryText("armor", "Bronze")) + ";");
+                battlesValue.setText(String.valueOf(townController.getCurrentBattlesWon()));
+
+                Button newArmorButton = townController.getInventoryText("armor", "Bronze").equals("Diamond")
+                        ? shopButton("Armor", "Maxed Out")
+                        : shopButton("Armor Upgrade -", String.valueOf(townController.getArmorPrice()));
+                newArmorButton.setOnAction(armorButtonRef[0].getOnAction());
+                shopPanel.getChildren().set(3, newArmorButton);
+                armorButtonRef[0] = newArmorButton;
+            }
+        });
+        swordButton.setOnAction(e -> {
+            if (townController.buySword()) {
+                swordLabel.getChildren().set(1, new Label(townController.getInventoryText("sword", "Bronze")));
+                ((Label) swordLabel.getChildren().get(1)).setStyle("-fx-font-size: 28px; -fx-text-fill: " + townController.itemColor(townController.getInventoryText("sword", "Bronze")) + ";");
+                battlesValue.setText(String.valueOf(townController.getCurrentBattlesWon()));
+
+                Button newSwordButton = townController.getInventoryText("sword", "Bronze").equals("Diamond")
+                        ? shopButton("Sword", "Maxed Out")
+                        : shopButton("Sword Upgrade -", String.valueOf(townController.getSwordPrice()));
+                newSwordButton.setOnAction(swordButtonRef[0].getOnAction());
+                shopPanel.getChildren().set(4, newSwordButton);
+                swordButtonRef[0] = newSwordButton;
+            }
+        });
+        healingButton.setOnAction(e -> {
+            String message = townController.buyHealingPotion();
+            if (message.isEmpty()) {
+                potionLabel.setText("Healing Potions: " + townController.getInventoryNumber("healing_potions", 0));
+                battlesValue.setText(String.valueOf(townController.getCurrentBattlesWon()));
+
+                Button newHealingButton = shopButton("Healing -", String.valueOf(townController.getHealingPrice()));
+                newHealingButton.setOnAction(healingButtonRef[0].getOnAction());
+                shopPanel.getChildren().set(5, newHealingButton);
+                healingButtonRef[0] = newHealingButton;
+            } else {
+                shopError.setText(message);
+                Timeline clearError = new Timeline(new KeyFrame(Duration.seconds(3), event -> shopError.setText("")));
+                clearError.play();
+            }
+        });
         backButton.setOnAction(e -> {
             shopPanel.setVisible(false);
             mainPanel.setVisible(true);
