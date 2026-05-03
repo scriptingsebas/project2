@@ -296,9 +296,6 @@ public class SceneFactory {
         warningLabel.setWrapText(true);
         warningLabel.setMaxWidth(SCENE_WIDTH);
 
-        //PLACEHOLDER ACTIONS
-        //Each button will receive their respective functionality within a method.
-
         //attackButton.setOnAction(e -> attackFunction());
         //defendButton.setOnAction(e -> defendFunction());
         //escapeButton.setOnAction(e -> dungeonStart(stage));
