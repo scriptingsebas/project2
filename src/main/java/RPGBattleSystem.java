@@ -1,5 +1,8 @@
 import java.util.Random;
 
+//The "RPGBattleSystem" Class is the handler/functionality implementer of the player's buttons.
+//It also serves to manage states.
+
 public class RPGBattleSystem {
     //HP PRESET(S):
     private int playerHP;
