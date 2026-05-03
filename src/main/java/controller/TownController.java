@@ -278,4 +278,8 @@ public class TownController {
         }
         return "white";
     }
+
+    public void addBattlesWon() {
+
+    }
 }

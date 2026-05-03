@@ -19,6 +19,7 @@ public class RPGBattleSystem {
     public RPGBattleSystem(Enemies dungeonEnemy) {
         //CONSTRUCTOR
         playerHP = 100;
+        enemyHP = dungeonEnemy.getEnemyHP();
     }
 
     //PLAYER HEALTH MANAGEMENT SECTION:
