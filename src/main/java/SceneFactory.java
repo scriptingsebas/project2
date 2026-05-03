@@ -276,9 +276,17 @@ public class SceneFactory {
         return new Scene(dungeonScene, SCENE_WIDTH, SCENE_HEIGHT);
     }
     private Scene dungeonFight (Stage stage) {
+        //PREFIGHT SET-UP
+        EnemyController systemControl = new EnemyController();
+        Enemies commonEnemy = systemControl.enemyRandomizer();
+        RPGBattleSystem battleSystem = new RPGBattleSystem(commonEnemy);
+        Label battleTracker = new Label();
+
         //TEXT SECTION
-        Label encounterLabel = new Label("A wild enemy appears!");
+        Label encounterLabel = new Label("A wild " + commonEnemy.getEnemyName() + "has appeared!");
         Label warningLabel = new Label(encounterText);
+        Label playerHealth = new Label("Player HP: " + battleSystem.getPlayerHP());
+        Label enemyHealth = new Label(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
 
         //ACTION BUTTON SECTION
         Button attackButton = new Button(userAttack);
@@ -296,11 +304,51 @@ public class SceneFactory {
         warningLabel.setWrapText(true);
         warningLabel.setMaxWidth(SCENE_WIDTH);
 
-        //attackButton.setOnAction(e -> attackFunction());
-        //defendButton.setOnAction(e -> defendFunction());
-        //escapeButton.setOnAction(e -> dungeonStart(stage));
+        attackButton.setOnAction(e -> {
+            int playerDMG = battleSystem.playerAttack();
 
-        VBox textSection = new VBox(10, encounterLabel, warningLabel);
+            if(battleSystem.enemyDefeatedTF()) {
+                townController.addBattlesWon();
+                stage.setScene(town(stage, currentUsername));
+                return;
+            }
+            int enemyDMG = battleSystem.enemyAttack();
+            playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
+            enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
+            battleTracker.setText("You've dealt " + playerDMG + "!\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
+
+            if(battleSystem.playerDefeatedTF()) {
+                stage.setScene(town(stage, currentUsername));
+            }
+        });
+
+        defendButton.setOnAction(e -> {
+            battleSystem.activateDefend();
+            int enemyDMG = battleSystem.enemyAttack();
+            playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
+            enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
+            battleTracker.setText("You defend yourself against the oncoming attack...\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
+
+            if(battleSystem.playerDefeatedTF()) {
+                stage.setScene(town(stage, currentUsername));
+            }
+        });
+
+        escapeButton.setOnAction(e -> {
+            int rngRoll = battleSystem.escapeChance();
+            if (battleSystem.escapeSuccess(rngRoll)) {
+                stage.setScene(dungeonStart(stage));
+            } else {
+                int enemyDMG = battleSystem.enemyAttack();
+                playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
+                enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
+                battleTracker.setText("You failed to run away!\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
+            }
+            if(battleSystem.playerDefeatedTF()) {
+                stage.setScene(town(stage, currentUsername));
+            }
+        });
+        VBox textSection = new VBox(10, encounterLabel, warningLabel, playerHealth, enemyHealth, battleTracker);
         textSection.setAlignment(Pos.CENTER);
 
         HBox buttonSection = new HBox(15, attackButton, defendButton, escapeButton);
