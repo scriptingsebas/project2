@@ -1,10 +1,12 @@
-package org.turnbasedtitans.project2;
+package org.turnbasedtitans.project2.controller;
+
+import org.turnbasedtitans.project2.Enemies;
 
 import java.util.Random;
 
 public class EnemyController {
     private static Random RNG = new Random();
-    private static final Enemies [] commonMobs = {
+    private static final Enemies[] commonMobs = {
             new Enemies("Zombie", 125),
             new Enemies("Mummy", 150),
             new Enemies("Slime", 75),

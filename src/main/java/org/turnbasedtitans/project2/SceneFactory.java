@@ -1,5 +1,8 @@
 package org.turnbasedtitans.project2;
 
+import org.turnbasedtitans.project2.controller.EnemyController;
+import org.turnbasedtitans.project2.controller.LogInController;
+import org.turnbasedtitans.project2.controller.RegisterController;
 import org.turnbasedtitans.project2.database.InventoryDAO;
 import org.turnbasedtitans.project2.controller.TownController;
 import javafx.animation.Animation;
@@ -19,7 +22,6 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.Priority;
 import javafx.util.Duration;
 import org.turnbasedtitans.project2.database.DatabaseManager;
-import org.turnbasedtitans.project2.database.UserDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -35,7 +37,9 @@ public class SceneFactory {
     private final DatabaseManager userDataManager;
     private final InventoryDAO inventoryDAO;
     private final TownController townController;
-    private String currentUsername;
+    private final RegisterController registerController;
+    private final LogInController loginController;
+    private static String currentUsername;
 
     private static final double FRAME_WIDTH = 100;
     private static final double FRAME_HEIGHT = 55;
@@ -45,6 +49,8 @@ public class SceneFactory {
     public SceneFactory(DatabaseManager userDataManager, InventoryDAO inventoryDAO) {
         this.userDataManager = userDataManager;
         this.inventoryDAO = inventoryDAO;
+        this.registerController = new RegisterController(userDataManager);
+        this.loginController = new LogInController(userDataManager);
         this.townController = new TownController(userDataManager, inventoryDAO);
     }
     private static final int SCENE_WIDTH = 430;
@@ -65,39 +71,68 @@ public class SceneFactory {
     private static final String userEscape = "Run";
 
 
-    public static Scene create(SceneType type, Stage stage, UserDAO userDAO) {
+    public Scene create(SceneType type, Stage stage) {
         return switch (type) {
-            case HOME -> home(stage, userDAO) ;
-            case REGISTER -> home(stage, userDAO) ;
-            case LOGIN -> home(stage, userDAO) ;
-            case TOWN -> home(stage, userDAO) ;
-            case DUNGEON_START -> home(stage, userDAO) ;
-            case DUNGEON_FIGHT -> home(stage, userDAO) ;
+            case HOME -> home(stage) ;
+            case REGISTER -> registerPage(stage) ;
+            case LOGIN -> logInPage(stage) ;
+            case TOWN -> town(stage, currentUsername) ;
+            case DUNGEON_START -> dungeonStart(stage) ;
+            case DUNGEON_FIGHT -> dungeonFight(stage) ;
         };
     }
-    private static Scene home(Stage stage, UserDAO userDAO) {
-        int spacing = 13;
-        Label title = new Label("RPG BATTLE QUEST");
-        Button create = new Button("Create Account");
-        Button login = new Button("Login");
+
+    public Scene home(Stage stage, String message) {
+        int spacing = 15;
+
+        Label title = new Label("RPG Battle Quest");
+        Label result = new Label(message);
+        Button create = shopButton("Create Account", "");
+        Button login = shopButton("Log In", "");
 
         create.setOnAction(e -> {
-            stage.setScene(home(stage, userDAO));
+            stage.setScene((create(SceneType.REGISTER, stage)));
         });
 
         login.setOnAction(e -> {
-            stage.setScene(home(stage, userDAO));
+            stage.setScene(create(SceneType.LOGIN, stage));
         });
 
-        VBox homePage = new VBox(spacing, title, create, login);
+        title.setText("RPG BATTLE QUEST");
+        title.setStyle("-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: white;");
+        result.setStyle("-fx-font-size: 18px; -fx-text-fill: yellow;");
+
+        VBox homePage = new VBox(spacing, title, result, create, login);
         homePage.setPadding(new Insets(30));
         homePage.setAlignment(Pos.CENTER);
+        homePage.setMaxWidth(350);
+        homePage.setStyle("-fx-background-color: rgba(10, 73, 108, 0.75); -fx-border-color: #0A496C; -fx-border-width: 3px;");
 
-        return new Scene(homePage, SCENE_WIDTH, SCENE_HEIGHT);
+        AnchorPane layout = new AnchorPane();
+        layout.setStyle("-fx-font-family: 'Pixelify Sans';");
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/titlescreen/nighttime.gif").toExternalForm());
+        BackgroundImage bg = new BackgroundImage(
+                bgImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true)
+        );
+        layout.setBackground(new Background(bg));
+        layout.getChildren().add(homePage);
+        AnchorPane.setTopAnchor(homePage, 190.0);
+        AnchorPane.setLeftAnchor(homePage, 40.0);
+        AnchorPane.setRightAnchor(homePage, 40.0);
+
+        return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
+    }
+
+    //this is so I return into the  bigger one to pass trough  messages
+    public Scene home(Stage stage) {
+        return home(stage, "");
     }
 
     private Scene registerPage(Stage stage) {
-        UserDAO userDAO = new UserDAO(userDataManager);
         Label title = new Label("Create  Account");
         TextField username = new TextField();
         TextField password = new TextField();
@@ -111,24 +146,16 @@ public class SceneFactory {
         back.setMaxWidth(220);
 
         back.setOnAction(e -> {
-            stage.setScene(home(stage));
+            stage.setScene(create(SceneType.HOME, stage));
         });
 
         create.setOnAction(e -> {
-            String user = username.getText().trim();
-            String pass = password.getText().trim();
+            String message = registerController.register(username.getText(), password.getText());
 
-            if (user.isEmpty() || pass.isEmpty()) {
-                result.setText("Enter username and password.");
-                return;
-            }
-
-            boolean created = userDAO.createUser(user, pass);
-
-            if (created) {
-                stage.setScene(home(stage, "Account successfully made!"));
+            if (message.equals("SUCCESS")) {
+                stage.setScene(create(SceneType.HOME, stage));
             } else {
-                result.setText("Username already exists.");
+                result.setText(message);
             }
         });
 
@@ -174,7 +201,6 @@ public class SceneFactory {
     }
 
     private Scene logInPage(Stage stage) {
-        UserDAO userDAO = new UserDAO(userDataManager);
         Label title = new Label("Log In");
         TextField username = new TextField();
         TextField password = new TextField();
@@ -188,23 +214,16 @@ public class SceneFactory {
         back.setMaxWidth(220);
 
         back.setOnAction(e -> {
-            stage.setScene(home(stage));
+            stage.setScene(create(SceneType.HOME, stage));
         });
 
         logIn.setOnAction(e -> {
-            String user = username.getText().trim();
-            String pass = password.getText().trim();
-
-            if (user.isEmpty() || pass.isEmpty()) {
-                result.setText("Enter username and password.");
-                return;
-            }
-
-            if (userDAO.loginUser(user, pass)) {
-                currentUsername = user;
-                stage.setScene(town(stage, currentUsername));
+            String message = loginController.login(username.getText(), password.getText());
+            if (message.equals("SUCCESS")) {
+                currentUsername = username.getText().trim();
+                stage.setScene(create(SceneType.TOWN, stage));
             } else {
-                result.setText("Invalid username or password.");
+                result.setText(message);
             }
         });
 
@@ -640,47 +659,4 @@ public class SceneFactory {
         return button;
     }
 
-    public Scene home(Stage stage) {
-        return home(stage, "");
-    }
-
-    public Scene home(Stage stage, String message) {
-        int spacing = 15;
-
-        Label title = new Label("RPG Battle Quest");
-        Label result = new Label(message);
-        Button create = shopButton("Create Account", "");
-        Button login = shopButton("Log In", "");
-
-        create.setOnAction(e -> stage.setScene(registerPage(stage)));
-        login.setOnAction(e -> stage.setScene(logInPage(stage)));
-
-        title.setText("RPG BATTLE QUEST");
-        title.setStyle("-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: white;");
-        result.setStyle("-fx-font-size: 18px; -fx-text-fill: yellow;");
-
-        VBox homePage = new VBox(spacing, title, result, create, login);
-        homePage.setPadding(new Insets(30));
-        homePage.setAlignment(Pos.CENTER);
-        homePage.setMaxWidth(350);
-        homePage.setStyle("-fx-background-color: rgba(10, 73, 108, 0.75); -fx-border-color: #0A496C; -fx-border-width: 3px;");
-
-        AnchorPane layout = new AnchorPane();
-        layout.setStyle("-fx-font-family: 'Pixelify Sans';");
-        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/titlescreen/nighttime.gif").toExternalForm());
-        BackgroundImage bg = new BackgroundImage(
-                bgImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true)
-        );
-        layout.setBackground(new Background(bg));
-        layout.getChildren().add(homePage);
-        AnchorPane.setTopAnchor(homePage, 190.0);
-        AnchorPane.setLeftAnchor(homePage, 40.0);
-        AnchorPane.setRightAnchor(homePage, 40.0);
-
-        return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
-    }
 }
