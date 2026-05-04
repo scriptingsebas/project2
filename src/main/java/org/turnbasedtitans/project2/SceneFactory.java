@@ -4,12 +4,14 @@ import org.turnbasedtitans.project2.database.InventoryDAO;
 import org.turnbasedtitans.project2.controller.TownController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -29,6 +31,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.io.InputStream;
 
 
 public class SceneFactory {
@@ -59,7 +62,6 @@ public class SceneFactory {
     private static final String pressOn = "Press On";
 
     //FIGHT TEXT PRESETS
-    private static final String encounterText = "Your life is in danger!";
     private static final String userAttack = "Attack";
     private static final String userDefend = "Defend";
     private static final String userEscape = "Run";
@@ -249,33 +251,52 @@ public class SceneFactory {
         return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
     private Scene dungeonStart (Stage stage) {
-        int dungeonSpacing = 10;
+        AnchorPane layout = new AnchorPane();
+        layout.setStyle("-fx-font-family: 'Pixelify Sans';");
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/dungeon/dungeon.gif").toExternalForm());
+        ImageView bgView = new ImageView(bgImage);
+        bgView.setFitHeight(SCENE_HEIGHT);
+        bgView.setPreserveRatio(true);
+        bgView.fitWidthProperty().bind(layout.widthProperty());
+        bgView.fitHeightProperty().bind(layout.heightProperty());
+        bgView.setPreserveRatio(false);
 
-        Label titleLabel = new Label(dungeonTitle);
+        Label titleLabel = sceneTitle(dungeonTitle);
+        anchorTitle(titleLabel);
+
+        int healthValue = townController.getInventoryNumber("health", 100);
+        HBox healthContainer = playerHealthContainer(playerHealthBar(healthValue), playerHealthLabel(healthValue));
+        anchorHealthContainer(healthContainer);
+
         Label bodyLabel = new Label(bodyText);
         Label conclusionLabel = new Label(conclusionText);
         Label promptLabel = new Label(userPrompt);
 
-        Button backButton = new Button(goBack);
-        Button forwardButton = new Button(pressOn);
+        bodyLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: white;");
+        conclusionLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: white;");
+        promptLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: yellow;");
+        bodyLabel.setWrapText(true);
+        conclusionLabel.setWrapText(true);
+        promptLabel.setWrapText(true);
 
-        //backButton.setOnAction(e -> stage.setScene(town(stage));
+        Button backButton = shopButton(goBack, "");
+        Button forwardButton = shopButton(pressOn, "");
+
+        backButton.setOnAction(e -> stage.setScene(town(stage, currentUsername)));
         forwardButton.setOnAction(e -> stage.setScene(dungeonFight(stage)));
 
-        VBox titleSection = new VBox(dungeonSpacing, titleLabel);
-        titleSection.setAlignment(Pos.CENTER);
+        VBox dungeonPanel = new VBox(20, bodyLabel, conclusionLabel, promptLabel, backButton, forwardButton);
+        dungeonPanel.setAlignment(Pos.CENTER);
+        dungeonPanel.setPadding(new Insets(28, 18, 28, 18));
+        dungeonPanel.setPrefSize(350, 360);
+        dungeonPanel.setStyle("-fx-background-color: rgba(10, 73, 108, 0.75); -fx-border-color: #0A496C; -fx-border-width: 3px;");
 
-        VBox bodySection = new VBox(dungeonSpacing, bodyLabel, conclusionLabel, promptLabel);
-        bodySection.setAlignment(Pos.CENTER);
+        AnchorPane.setTopAnchor(dungeonPanel, 190.0);
+        AnchorPane.setLeftAnchor(dungeonPanel, 40.0);
+        AnchorPane.setRightAnchor(dungeonPanel, 40.0);
 
-        VBox buttonSection = new VBox(dungeonSpacing, backButton, forwardButton);
-        buttonSection.setAlignment(Pos.CENTER);
-
-        VBox dungeonScene = new VBox(dungeonSpacing, titleSection, bodySection, buttonSection);
-        dungeonScene.setAlignment(Pos.CENTER);
-        dungeonScene.setPadding(new Insets(30));
-
-        return new Scene(dungeonScene, SCENE_WIDTH, SCENE_HEIGHT);
+        layout.getChildren().addAll(bgView, titleLabel, healthContainer, dungeonPanel);
+        return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
     private Scene dungeonFight (Stage stage) {
         //PREFIGHT SET-UP
@@ -283,84 +304,276 @@ public class SceneFactory {
         Enemies commonEnemy = systemControl.enemyRandomizer();
         RPGBattleSystem battleSystem = new RPGBattleSystem(commonEnemy, inventoryDAO, currentUsername);
         Label battleTracker = new Label();
+        Label deathLabel = new Label("YOU DIED");
+        Label winLabel = new Label("YOU WIN");
+        Image laserImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/dungeon/dungeon-laser.gif").toExternalForm());
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/dungeon/dungeon.gif").toExternalForm());
+        ImageView bgView = new ImageView(bgImage);
+        bgView.fitWidthProperty().bind(stage.widthProperty());
+        bgView.fitHeightProperty().bind(stage.heightProperty());
+        bgView.setPreserveRatio(false);
 
         //TEXT SECTION
-        Label encounterLabel = new Label("A wild " + commonEnemy.getEnemyName() + "has appeared!");
-        Label warningLabel = new Label(encounterText);
+        Label encounterStartLabel = new Label("A wild ");
+        encounterStartLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: white;");
+
+        Label encounterEnemyLabel = new Label(commonEnemy.getEnemyName());
+        encounterEnemyLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: yellow;");
+
+        Label encounterEndLabel = new Label(" has appeared! Your life is in danger!");
+        encounterEndLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: white;");
+
+        HBox encounterLabel = new HBox(encounterStartLabel, encounterEnemyLabel, encounterEndLabel);
         Label playerHealth = new Label("Player HP: " + battleSystem.getPlayerHP());
         Label enemyHealth = new Label(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
 
+        // Health bar UI
+        int healthValue = townController.getInventoryNumber("health", 100);
+        ProgressBar healthBar = playerHealthBar(healthValue);
+        Label healthPercentLabel = playerHealthLabel(healthValue);
+        HBox healthContainer = playerHealthContainer(healthBar, healthPercentLabel);
+        anchorHealthContainer(healthContainer);
+
+        AnimatedSprite heroSprite = heroSpriteCanvas();
+        Canvas hero = heroSprite.getCanvas();
+        VBox heroBox = new VBox(hero);
+        heroBox.setAlignment(Pos.CENTER);
+        AnchorPane.setLeftAnchor(heroBox, -40.0);
+        AnchorPane.setTopAnchor(heroBox, 100.0);
+        AnchorPane.setBottomAnchor(heroBox, 40.0);
+
+        AnimatedSprite enemySprite = enemySpriteCanvas(commonEnemy.getSpritePath());
+        Canvas enemy = enemySprite.getCanvas();
+        int enemyStartingHP = systemControl.enemyStartingHP(commonEnemy);
+        ProgressBar enemySpriteHealthBar = new ProgressBar(1.0);
+        enemySpriteHealthBar.setPrefWidth(150);
+        enemySpriteHealthBar.setPrefHeight(16);
+        enemySpriteHealthBar.setStyle("-fx-accent: red;");
+        Label enemySpriteHealthLabel = new Label((int) ((battleSystem.getEnemyHP() / (double) enemyStartingHP) * 100) + "%");
+        enemySpriteHealthLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white;");
+        HBox enemySpriteHealthContainer = new HBox(6, enemySpriteHealthBar, enemySpriteHealthLabel);
+        enemySpriteHealthContainer.setAlignment(Pos.CENTER);
+        VBox enemyBox = new VBox(12, enemySpriteHealthContainer, enemy);
+        enemyBox.setAlignment(Pos.CENTER);
+        AnchorPane.setRightAnchor(enemyBox, 40.0);
+        AnchorPane.setTopAnchor(enemyBox, 100.0);
+        AnchorPane.setBottomAnchor(enemyBox, 40.0);
+
         //ACTION BUTTON SECTION
-        Button attackButton = new Button(userAttack);
-        Button defendButton = new Button(userDefend);
-        Button escapeButton = new Button(userEscape);
+        Button attackButton = shopButton(userAttack, "");
+        Button defendButton = shopButton(userDefend, "");
+        Button escapeButton = shopButton(userEscape, "");
+        Button potionButton = shopButton("Healing Potions:", String.valueOf(townController.getInventoryNumber("healing_potions", 0)));
 
         //POLISH/FORMATTING
-        attackButton.setPrefWidth(100);
-        defendButton.setPrefWidth(100);
-        escapeButton.setPrefWidth(100);
+        attackButton.setPrefWidth(150);
+        defendButton.setPrefWidth(150);
+        escapeButton.setPrefWidth(150);
+        attackButton.setPrefHeight(60);
+        defendButton.setPrefHeight(60);
+        escapeButton.setPrefHeight(60);
+        potionButton.setPrefWidth(270);
+        potionButton.setPrefHeight(60);
 
-        encounterLabel.setWrapText(true);
-        encounterLabel.setMaxWidth(SCENE_WIDTH);
 
-        warningLabel.setWrapText(true);
-        warningLabel.setMaxWidth(SCENE_WIDTH);
+            attackButton.setOnAction(e -> {
+            encounterLabel.setVisible(false);
+            attackButton.setDisable(true);
+            defendButton.setDisable(true);
+            escapeButton.setDisable(true);
 
-        attackButton.setOnAction(e -> {
+            heroSprite.play(3, 0, 8);
+            enemySprite.play(0, 4, 4);
+
             int playerDMG = battleSystem.playerAttack();
+            enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
+            enemySpriteHealthBar.setProgress(Math.max(0, battleSystem.getEnemyHP() / (double) enemyStartingHP));
+            enemySpriteHealthLabel.setText((int) ((battleSystem.getEnemyHP() / (double) enemyStartingHP) * 100) + "%");
+            battleTracker.setVisible(true);
+            battleTracker.setText("You've dealt " + playerDMG + "!");
 
             if(battleSystem.enemyDefeatedTF()) {
                 townController.addBattlesWon();
-                stage.setScene(town(stage, currentUsername));
+                PauseTransition attackFinishDelay = new PauseTransition(Duration.millis(150 * 8));
+                attackFinishDelay.setOnFinished(event -> {
+                    heroSprite.play(0, 0, IDLE_FRAMES);
+                    enemySprite.play(4, 0, 3);
+                    bgView.setImage(laserImage);
+                    PauseTransition laserDelay = new PauseTransition(Duration.millis(2500));
+                    laserDelay.setOnFinished(winEvent -> {
+                        bgView.setImage(bgImage);
+                        enemyBox.setVisible(false);
+                        winLabel.setVisible(true);
+                        winLabel.toFront();
+                        PauseTransition winDelay = new PauseTransition(Duration.seconds(3));
+                        winDelay.setOnFinished(returnEvent -> stage.setScene(town(stage, currentUsername)));
+                        winDelay.play();
+                    });
+                    laserDelay.play();
+                });
+                attackFinishDelay.play();
                 return;
             }
-            int enemyDMG = battleSystem.enemyAttack();
-            playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
-            enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
-            battleTracker.setText("You've dealt " + playerDMG + "!\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
 
-            if(battleSystem.playerDefeatedTF()) {
-                stage.setScene(town(stage, currentUsername));
-            }
+            PauseTransition enemyTurnDelay = new PauseTransition(Duration.seconds(1));
+            enemyTurnDelay.setOnFinished(event -> {
+                enemySprite.play(2, 0, 8, -7);
+                heroSprite.play(0, 0, IDLE_FRAMES);
+
+                int enemyDMG = battleSystem.enemyAttack();
+                playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
+                healthBar.setProgress(battleSystem.getPlayerHP() / 100.0);
+                healthPercentLabel.setText(battleSystem.getPlayerHP() + "%");
+                battleTracker.setText(battleTracker.getText() + "  " + commonEnemy.getEnemyName() + " dealt " + enemyDMG + "!");
+
+                PauseTransition resetDelay = new PauseTransition(Duration.seconds(1));
+                resetDelay.setOnFinished(resetEvent -> {
+                    if(battleSystem.playerDefeatedTF()) {
+                        showDeathThenReturn(stage, battleSystem, deathLabel);
+                        return;
+                    }
+
+                    heroSprite.play(0, 0, IDLE_FRAMES);
+                    enemySprite.play(0, 0, 4);
+                    attackButton.setDisable(false);
+                    defendButton.setDisable(false);
+                    escapeButton.setDisable(false);
+                });
+                resetDelay.play();
+            });
+            enemyTurnDelay.play();
         });
 
         defendButton.setOnAction(e -> {
-            battleSystem.activateDefend();
-            int enemyDMG = battleSystem.enemyAttack();
-            playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
-            enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
-            battleTracker.setText("You defend yourself against the oncoming attack...\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
+            encounterLabel.setVisible(false);
+            attackButton.setDisable(true);
+            defendButton.setDisable(true);
+            escapeButton.setDisable(true);
 
-            if(battleSystem.playerDefeatedTF()) {
-                stage.setScene(town(stage, currentUsername));
-            }
+            battleSystem.activateDefend();
+            heroSprite.play(6, 0, 8);
+            enemySprite.play(2, 0, 8, -7);
+
+            PauseTransition defendDelay = new PauseTransition(Duration.seconds(1));
+            defendDelay.setOnFinished(event -> {
+
+                int enemyDMG = battleSystem.enemyAttack();
+                playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
+                healthBar.setProgress(battleSystem.getPlayerHP() / 100.0);
+                healthPercentLabel.setText(battleSystem.getPlayerHP() + "%");
+                enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
+                enemySpriteHealthBar.setProgress(Math.max(0, battleSystem.getEnemyHP() / (double) enemyStartingHP));
+                enemySpriteHealthLabel.setText((int) ((battleSystem.getEnemyHP() / (double) enemyStartingHP) * 100) + "%");
+                battleTracker.setVisible(true);
+                battleTracker.setText("You defend yourself against the oncoming attack... " + commonEnemy.getEnemyName() + " dealt " + enemyDMG + "!");
+
+                PauseTransition resetDelay = new PauseTransition(Duration.seconds(1));
+                resetDelay.setOnFinished(resetEvent -> {
+                    if(battleSystem.playerDefeatedTF()) {
+                        showDeathThenReturn(stage, battleSystem, deathLabel);
+                        return;
+                    }
+
+                    heroSprite.play(0, 0, IDLE_FRAMES);
+                    enemySprite.play(0, 0, 4);
+                    attackButton.setDisable(false);
+                    defendButton.setDisable(false);
+                    escapeButton.setDisable(false);
+                });
+                resetDelay.play();
+            });
+            defendDelay.play();
         });
 
         escapeButton.setOnAction(e -> {
+            encounterLabel.setVisible(false);
+            battleTracker.setVisible(true);
             int rngRoll = battleSystem.escapeChance();
             if (battleSystem.escapeSuccess(rngRoll)) {
                 stage.setScene(dungeonStart(stage));
             } else {
                 int enemyDMG = battleSystem.enemyAttack();
                 playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
+                healthBar.setProgress(battleSystem.getPlayerHP() / 100.0);
+                healthPercentLabel.setText(battleSystem.getPlayerHP() + "%");
                 enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
-                battleTracker.setText("You failed to run away!\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
+                enemySpriteHealthBar.setProgress(Math.max(0, battleSystem.getEnemyHP() / (double) enemyStartingHP));
+                enemySpriteHealthLabel.setText((int) ((battleSystem.getEnemyHP() / (double) enemyStartingHP) * 100) + "%");
+                battleTracker.setText("You failed to run away! " + commonEnemy.getEnemyName() + " dealt " + enemyDMG + "!");
             }
             if(battleSystem.playerDefeatedTF()) {
-                stage.setScene(town(stage, currentUsername));
+                showDeathThenReturn(stage, battleSystem, deathLabel);
             }
         });
-        VBox textSection = new VBox(10, encounterLabel, warningLabel, playerHealth, enemyHealth, battleTracker);
+        potionButton.setOnAction(e -> {
+            useHealingPotion();
+            int updatedHealth = townController.getInventoryNumber("health", 100);
+            battleSystem.setPlayerHP(updatedHealth);
+            playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
+            healthBar.setProgress(updatedHealth / 100.0);
+            healthPercentLabel.setText(updatedHealth + "%");
+            potionButton.setGraphic(shopButton("Healing Potions:", String.valueOf(townController.getInventoryNumber("healing_potions", 0))).getGraphic());
+        });
+        VBox textSection = new VBox(10, playerHealth, enemyHealth);
         textSection.setAlignment(Pos.CENTER);
+        encounterLabel.setAlignment(Pos.CENTER);
+        encounterLabel.setMaxWidth(Double.MAX_VALUE);
+        AnchorPane.setTopAnchor(encounterLabel, 120.0);
+        AnchorPane.setLeftAnchor(encounterLabel, 0.0);
+        AnchorPane.setRightAnchor(encounterLabel, 0.0);
+        battleTracker.setVisible(false);
+        battleTracker.setAlignment(Pos.CENTER);
+        battleTracker.setMaxWidth(Double.MAX_VALUE);
+        battleTracker.setWrapText(false);
+        AnchorPane.setTopAnchor(battleTracker, 120.0);
+        AnchorPane.setLeftAnchor(battleTracker, 0.0);
+        AnchorPane.setRightAnchor(battleTracker, 0.0);
+        playerHealth.setStyle("-fx-font-size: 20px; -fx-text-fill: white;");
+        enemyHealth.setStyle("-fx-font-size: 20px; -fx-text-fill: white;");
+        battleTracker.setStyle("-fx-font-size: 22px; -fx-text-fill: white;");
+        deathLabel.setVisible(false);
+        deathLabel.setStyle("-fx-font-size: 120px; -fx-font-weight: bold; -fx-text-fill: red;");
+        deathLabel.setAlignment(Pos.CENTER);
+        deathLabel.setMaxWidth(Double.MAX_VALUE);
+        AnchorPane.setTopAnchor(deathLabel, 300.0);
+        AnchorPane.setLeftAnchor(deathLabel, 0.0);
+        AnchorPane.setRightAnchor(deathLabel, 0.0);
+        winLabel.setVisible(false);
+        winLabel.setStyle("-fx-font-size: 120px; -fx-font-weight: bold; -fx-text-fill: green;");
+        winLabel.setAlignment(Pos.CENTER);
+        winLabel.setMaxWidth(Double.MAX_VALUE);
+        AnchorPane.setTopAnchor(winLabel, 300.0);
+        AnchorPane.setLeftAnchor(winLabel, 0.0);
+        AnchorPane.setRightAnchor(winLabel, 0.0);
 
-        HBox buttonSection = new HBox(15, attackButton, defendButton, escapeButton);
+        HBox buttonSection = new HBox(18, attackButton, defendButton, escapeButton, potionButton);
         buttonSection.setAlignment(Pos.CENTER);
 
-        VBox fightLayout = new VBox(30, textSection, buttonSection);
-        fightLayout.setAlignment(Pos.CENTER);
-        fightLayout.setPadding(new Insets(30));
+        Label titleLabel = sceneTitle("BATTLE");
+        anchorTitle(titleLabel);
+
+        VBox fightPanel = new VBox(20, textSection, buttonSection);
+        fightPanel.setAlignment(Pos.BOTTOM_CENTER);
+        fightPanel.setPadding(new Insets(0, 35, 25, 35));
+        fightPanel.setStyle("-fx-background-color: transparent;");
+        AnchorPane.setLeftAnchor(fightPanel, 0.0);
+        AnchorPane.setRightAnchor(fightPanel, 0.0);
+        AnchorPane.setBottomAnchor(fightPanel, 0.0);
+
+        AnchorPane fightLayout = new AnchorPane(titleLabel, healthContainer, encounterLabel, battleTracker, deathLabel, winLabel, heroBox, enemyBox, fightPanel);
+        fightLayout.setStyle("-fx-font-family: 'Pixelify Sans';");
+        fightLayout.getChildren().add(0, bgView);
 
         return new Scene(fightLayout, SCENE_WIDTH, SCENE_HEIGHT);
+    }
+
+    private void showDeathThenReturn(Stage stage, RPGBattleSystem battleSystem, Label deathLabel) {
+        deathLabel.setVisible(true);
+        deathLabel.toFront();
+
+        PauseTransition deathDelay = new PauseTransition(Duration.seconds(3));
+        deathDelay.setOnFinished(event -> stage.setScene(town(stage, currentUsername)));
+        deathDelay.play();
     }
 
     public Scene town(Stage stage, String username) {
@@ -395,46 +608,16 @@ public class SceneFactory {
         );
         layout.setBackground(new Background(bg));
 
-        Label title = new Label("THE VILLAGE");
-        title.setStyle("-fx-font-size: 50px; -fx-font-weight: bold;");
-        title.setAlignment(Pos.CENTER);
-        title.setMaxWidth(Double.MAX_VALUE);
-        AnchorPane.setTopAnchor(title, 20.0);
-        AnchorPane.setLeftAnchor(title, 0.0);
-        AnchorPane.setRightAnchor(title, 0.0);
+        Label title = sceneTitle("THE VILLAGE");
+        anchorTitle(title);
 
         int healthValue = townController.getInventoryNumber("health", 100);
-        ProgressBar healthBar = new ProgressBar(healthValue / 100.0);
-        healthBar.setPrefHeight(25);
-        healthBar.setMaxWidth(Double.MAX_VALUE);
-        healthBar.setStyle("-fx-accent: #16d715;");
-        HBox.setHgrow(healthBar, Priority.ALWAYS);
+        ProgressBar healthBar = playerHealthBar(healthValue);
+        Label healthLabel = playerHealthLabel(healthValue);
+        HBox healthContainer = playerHealthContainer(healthBar, healthLabel);
+        anchorHealthContainer(healthContainer);
 
-        Label healthLabel = new Label(healthValue + "%");
-        healthLabel.setStyle("-fx-font-size: 20px;");
-
-        HBox healthContainer = new HBox(6, healthBar, healthLabel);
-        healthContainer.setAlignment(Pos.CENTER);
-        AnchorPane.setTopAnchor(healthContainer, 85.0);
-        AnchorPane.setLeftAnchor(healthContainer, 15.0);
-        AnchorPane.setRightAnchor(healthContainer, 15.0);
-
-        Image heroImage = new Image(getClass().getResourceAsStream("/org/turnbasedtitans/project2/characters/HeroKnight.png"));
-        Canvas hero = new Canvas(FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE);
-        GraphicsContext heroGraphics = hero.getGraphicsContext2D();
-        heroGraphics.setImageSmoothing(false);
-        heroGraphics.drawImage(heroImage, 0, 0, FRAME_WIDTH, FRAME_HEIGHT, 0, 0, FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE);
-
-        final int[] heroFrame = {0};
-        Timeline heroAnimation = new Timeline(new KeyFrame(Duration.millis(150), e -> {
-            heroFrame[0] = (heroFrame[0] + 1) % IDLE_FRAMES;
-            heroGraphics.clearRect(0, 0, hero.getWidth(), hero.getHeight());
-            heroGraphics.drawImage(heroImage,
-                    heroFrame[0] * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT,
-                    0, 0, FRAME_WIDTH * SPRITE_SCALE, FRAME_HEIGHT * SPRITE_SCALE);
-        }));
-        heroAnimation.setCycleCount(Animation.INDEFINITE);
-        heroAnimation.play();
+        Canvas hero = heroSpriteCanvas().getCanvas();
 
         VBox heroBox = new VBox(hero);
         heroBox.setAlignment(Pos.CENTER);
@@ -607,6 +790,132 @@ public class SceneFactory {
         }
     }
 
+
+    private AnimatedSprite heroSpriteCanvas() {
+        Image heroImage = new Image(getClass().getResourceAsStream("/org/turnbasedtitans/project2/characters/HeroKnight.png"));
+        return new AnimatedSprite(heroImage, FRAME_WIDTH, FRAME_HEIGHT, SPRITE_SCALE, 150, 0, 0, IDLE_FRAMES);
+    }
+
+    private AnimatedSprite enemySpriteCanvas(String spritePath) {
+        final double enemyFrameWidth = 384.0 / 8;
+        final double enemyFrameHeight = 256.0 / 5.0;
+        final double enemyScale = Math.min((FRAME_WIDTH * SPRITE_SCALE) / enemyFrameWidth, (FRAME_HEIGHT * SPRITE_SCALE) / enemyFrameHeight);
+
+        if (!spritePath.startsWith("/")) {
+            spritePath = "/" + spritePath;
+        }
+
+        InputStream enemyStream = getClass().getResourceAsStream(spritePath);
+        if (enemyStream == null) {
+            throw new IllegalArgumentException("Enemy sprite not found: " + spritePath);
+        }
+
+        Image enemyImage = new Image(enemyStream);
+        return new AnimatedSprite(enemyImage, enemyFrameWidth, enemyFrameHeight, enemyScale, 150, 0, 0, 4);
+    }
+
+    private class AnimatedSprite {
+        private final Image image;
+        private final Canvas canvas;
+        private final GraphicsContext graphics;
+        private final double frameWidth;
+        private final double frameHeight;
+        private final double scale;
+        private final double frameSpeed;
+        private Timeline animation;
+
+        private AnimatedSprite(Image image, double frameWidth, double frameHeight, double scale, double frameSpeed, int row, int startFrame, int frameCount) {
+            this.image = image;
+            this.frameWidth = frameWidth;
+            this.frameHeight = frameHeight;
+            this.scale = scale;
+            this.frameSpeed = frameSpeed;
+            this.canvas = new Canvas(frameWidth * scale, frameHeight * scale);
+            this.graphics = canvas.getGraphicsContext2D();
+            this.graphics.setImageSmoothing(false);
+            play(row, startFrame, frameCount);
+        }
+
+        private Canvas getCanvas() {
+            return canvas;
+        }
+
+        private void play(int row, int startFrame, int frameCount) {
+            play(row, startFrame, frameCount, 0);
+        }
+
+        private void play(int row, int startFrame, int frameCount, double sourceYOffset) {
+            if (animation != null) {
+                animation.stop();
+            }
+
+            final int[] currentFrame = {0};
+            drawFrame(row, startFrame, sourceYOffset);
+
+            animation = new Timeline(new KeyFrame(Duration.millis(frameSpeed), e -> {
+                currentFrame[0] = (currentFrame[0] + 1) % frameCount;
+                drawFrame(row, startFrame + currentFrame[0], sourceYOffset);
+            }));
+            animation.setCycleCount((row == 3 || row == 4) ? frameCount : Animation.INDEFINITE);
+            animation.play();
+        }
+
+        private void drawFrame(int row, int frame, double sourceYOffset) {
+            graphics.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            graphics.drawImage(
+                    image,
+                    frame * frameWidth,
+                    row * frameHeight + sourceYOffset,
+                    frameWidth,
+                    frameHeight,
+                    0,
+                    0,
+                    frameWidth * scale,
+                    frameHeight * scale
+            );
+        }
+    }
+
+    private Label sceneTitle(String text) {
+        Label title = new Label(text);
+        title.setStyle("-fx-font-size: 50px; -fx-font-weight: bold; -fx-text-fill: white;");
+        title.setAlignment(Pos.CENTER);
+        title.setMaxWidth(Double.MAX_VALUE);
+        return title;
+    }
+
+    private void anchorTitle(Label title) {
+        AnchorPane.setTopAnchor(title, 20.0);
+        AnchorPane.setLeftAnchor(title, 0.0);
+        AnchorPane.setRightAnchor(title, 0.0);
+    }
+
+    private ProgressBar playerHealthBar(int healthValue) {
+        ProgressBar healthBar = new ProgressBar(healthValue / 100.0);
+        healthBar.setPrefHeight(25);
+        healthBar.setMaxWidth(Double.MAX_VALUE);
+        healthBar.setStyle("-fx-accent: #16d715;");
+        HBox.setHgrow(healthBar, Priority.ALWAYS);
+        return healthBar;
+    }
+
+    private Label playerHealthLabel(int healthValue) {
+        Label healthLabel = new Label(healthValue + "%");
+        healthLabel.setStyle("-fx-font-size: 20px;");
+        return healthLabel;
+    }
+
+    private HBox playerHealthContainer(ProgressBar healthBar, Label healthLabel) {
+        HBox healthContainer = new HBox(6, healthBar, healthLabel);
+        healthContainer.setAlignment(Pos.CENTER);
+        return healthContainer;
+    }
+
+    private void anchorHealthContainer(HBox healthContainer) {
+        AnchorPane.setTopAnchor(healthContainer, 85.0);
+        AnchorPane.setLeftAnchor(healthContainer, 15.0);
+        AnchorPane.setRightAnchor(healthContainer, 15.0);
+    }
 
     private Button shopButton(String itemText, String priceText) {
         Label itemLabel = new Label(itemText);
