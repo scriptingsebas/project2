@@ -57,6 +57,7 @@ public class DatabaseManager {
                 armor TEXT DEFAULT 'Bronze',
                 healing_potions INTEGER DEFAULT 0,
                 battles_won INTEGER DEFAULT 0,
+                health INTEGER DEFAULT 100,
                 FOREIGN KEY(username) REFERENCES users(username)
             );
         """;

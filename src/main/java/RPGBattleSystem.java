@@ -1,4 +1,7 @@
+import database.InventoryDAO;
 import java.util.Random;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 //The "RPGBattleSystem" Class is the handler/functionality implementer of the player's buttons.
 //It also serves to manage states.
@@ -7,6 +10,8 @@ public class RPGBattleSystem {
     //HP PRESET(S):
     private int playerHP;
     private int enemyHP;
+    private InventoryDAO inventoryDAO;
+    private String username;
 
     //ATTACK PRESET(S):
     private final int baseDMG = 5;
@@ -22,6 +27,37 @@ public class RPGBattleSystem {
         enemyHP = dungeonEnemy.getEnemyHP();
     }
 
+    public RPGBattleSystem(Enemies dungeonEnemy, InventoryDAO inventoryDAO, String username) {
+        //CONSTRUCTOR WITH DATABASE HEALTH
+        this.inventoryDAO = inventoryDAO;
+        this.username = username;
+        playerHP = getSavedPlayerHP();
+        enemyHP = dungeonEnemy.getEnemyHP();
+    }
+
+    private int getSavedPlayerHP() {
+        try (ResultSet inventory = inventoryDAO.getInventory(username)) {
+            if (inventory.next()) {
+                return inventory.getInt("health");
+            }
+        } catch (SQLException e) {
+            System.out.println("Could not load player health: " + e.getMessage());
+        }
+        return 100;
+    }
+
+    private void savePlayerHP() {
+        if (inventoryDAO == null || username == null) {
+            return;
+        }
+
+        try {
+            inventoryDAO.updateHealth(username, playerHP);
+        } catch (SQLException e) {
+            System.out.println("Could not save player health: " + e.getMessage());
+        }
+    }
+
     //PLAYER HEALTH MANAGEMENT SECTION:
 
     public int getPlayerHP() {
@@ -35,6 +71,7 @@ public class RPGBattleSystem {
         if(playerHP < 0) {
             playerHP = 0;
         }
+        savePlayerHP();
     }
     public boolean playerDefeatedTF() {
         //Player is defeated upon HP hitting/reaching 0

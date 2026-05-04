@@ -280,6 +280,17 @@ public class TownController {
     }
 
     public void addBattlesWon() {
+        if (currentUsername == null) {
+            return;
+        }
 
+        String sql = "UPDATE inventory SET battles_won = battles_won + 1 WHERE username = ?";
+
+        try (java.sql.PreparedStatement stmt = userDataManager.getConnection().prepareStatement(sql)) {
+            stmt.setString(1, currentUsername);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Add battle won failed: " + e.getMessage());
+        }
     }
 }

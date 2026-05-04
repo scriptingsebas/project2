@@ -67,4 +67,14 @@ public class InventoryDAO {
             stmt.executeUpdate();
         }
     }
+
+    // Update health
+    public void updateHealth(String username, int health) throws SQLException {
+        String sql = "UPDATE inventory SET health = ? WHERE username = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, health);
+            stmt.setString(2, username);
+            stmt.executeUpdate();
+        }
+    }
 }

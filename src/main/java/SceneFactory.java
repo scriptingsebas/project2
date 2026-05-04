@@ -279,7 +279,7 @@ public class SceneFactory {
         //PREFIGHT SET-UP
         EnemyController systemControl = new EnemyController();
         Enemies commonEnemy = systemControl.enemyRandomizer();
-        RPGBattleSystem battleSystem = new RPGBattleSystem(commonEnemy);
+        RPGBattleSystem battleSystem = new RPGBattleSystem(commonEnemy, inventoryDAO, currentUsername);
         Label battleTracker = new Label();
 
         //TEXT SECTION
@@ -401,13 +401,14 @@ public class SceneFactory {
         AnchorPane.setLeftAnchor(title, 0.0);
         AnchorPane.setRightAnchor(title, 0.0);
 
-        ProgressBar healthBar = new ProgressBar(1.0);
+        int healthValue = townController.getInventoryNumber("health", 100);
+        ProgressBar healthBar = new ProgressBar(healthValue / 100.0);
         healthBar.setPrefHeight(25);
         healthBar.setMaxWidth(Double.MAX_VALUE);
         healthBar.setStyle("-fx-accent: #16d715;");
         HBox.setHgrow(healthBar, Priority.ALWAYS);
 
-        Label healthLabel = new Label("100%");
+        Label healthLabel = new Label(healthValue + "%");
         healthLabel.setStyle("-fx-font-size: 20px;");
 
         HBox healthContainer = new HBox(6, healthBar, healthLabel);
