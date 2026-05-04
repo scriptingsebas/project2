@@ -13,7 +13,7 @@
             fx:controller="org.turnbasedtitans.project2.controller.VillageController"
             stylesheets="@style.css">
 
-    <!-- Main village screen-->
+    <!-- org.turnbasedtitans.project2.Main village screen-->
 
     <children>
         <!-- Title at the top of the screen. Change the text or title-label CSS to edit it. -->

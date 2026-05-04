@@ -1,3 +1,5 @@
+package org.turnbasedtitans.project2;
+
 import java.util.Random;
 
 public class EnemyController {

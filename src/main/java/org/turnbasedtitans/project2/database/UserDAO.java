@@ -1,7 +1,7 @@
-package database;
+package org.turnbasedtitans.project2.database;
 
 /**
- * This will help  us access the user information database
+ * This will help  us access the user information org.turnbasedtitans.project2.database
  *
  * @author Bill Ung
  * @since 4/20/26

@@ -1,5 +1,7 @@
-import database.InventoryDAO;
-import controller.TownController;
+package org.turnbasedtitans.project2;
+
+import org.turnbasedtitans.project2.database.InventoryDAO;
+import org.turnbasedtitans.project2.controller.TownController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -16,8 +18,8 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.Priority;
 import javafx.util.Duration;
-import database.DatabaseManager;
-import database.UserDAO;
+import org.turnbasedtitans.project2.database.DatabaseManager;
+import org.turnbasedtitans.project2.database.UserDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -383,7 +385,7 @@ public class SceneFactory {
     private Scene townUI(Stage stage, String shopMessage) {
         AnchorPane layout = new AnchorPane();
         layout.setStyle("-fx-font-family: 'Pixelify Sans';");
-        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/village/animatedtown-crop-2.gif").toExternalForm());
+        Image bgImage = new Image(getClass().getResource("/org/turnbasedtitans/project2/animatedtown-crop-2.gif").toExternalForm());
         BackgroundImage bg = new BackgroundImage(
                 bgImage,
                 BackgroundRepeat.NO_REPEAT,

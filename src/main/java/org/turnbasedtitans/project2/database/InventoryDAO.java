@@ -1,4 +1,4 @@
-package database;
+package org.turnbasedtitans.project2.database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Handles all database operations related to a user's inventory.
+ * Handles all org.turnbasedtitans.project2.database operations related to a user's inventory.
  *
  * @author Sebastian Guillen
  * @since 4/27/26

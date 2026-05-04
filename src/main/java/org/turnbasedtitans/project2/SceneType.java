@@ -1,3 +1,5 @@
+package org.turnbasedtitans.project2;
+
 public enum SceneType {
     HOME,
     REGISTER,

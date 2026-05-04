@@ -1,7 +1,7 @@
-package controller;
+package org.turnbasedtitans.project2.controller;
 
-import database.DatabaseManager;
-import database.InventoryDAO;
+import org.turnbasedtitans.project2.database.DatabaseManager;
+import org.turnbasedtitans.project2.database.InventoryDAO;
 
 /**
  * Handles town inventory, shop prices, and shop purchases.
