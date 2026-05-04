@@ -25,7 +25,7 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainClass.set("Main")
+    mainClass.set("org.turnbasedtitans.project2.Main")
 }
 
 javafx {
@@ -36,6 +36,7 @@ javafx {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     // Source: https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
     implementation("org.xerial:sqlite-jdbc:3.53.0.0")
 }

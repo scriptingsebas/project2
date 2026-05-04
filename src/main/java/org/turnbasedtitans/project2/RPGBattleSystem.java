@@ -1,9 +1,11 @@
-import database.InventoryDAO;
+package org.turnbasedtitans.project2;
+
+import org.turnbasedtitans.project2.database.InventoryDAO;
 import java.util.Random;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-//The "RPGBattleSystem" Class is the handler/functionality implementer of the player's buttons.
+//The "org.turnbasedtitans.project2.RPGBattleSystem" Class is the handler/functionality implementer of the player's buttons.
 //It also serves to manage states.
 
 public class RPGBattleSystem {

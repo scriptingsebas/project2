@@ -222,7 +222,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# SQLite database
+# SQLite org.turnbasedtitans.project2.database
 *.sqlite
 *.db
 

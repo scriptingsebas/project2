@@ -1,4 +1,4 @@
-//DESCRIPTION: "Enemies" is the handler/assigner of enemy names/health values.
+package org.turnbasedtitans.project2;//DESCRIPTION: "org.turnbasedtitans.project2.Enemies" is the handler/assigner of enemy names/health values.
 
 public class Enemies {
     //PRESETS

@@ -1,4 +1,4 @@
-package database;
+package org.turnbasedtitans.project2.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
