@@ -492,8 +492,6 @@ public class SceneFactory {
         HBox swordLabel = inventoryItemLabel("Sword", townController.getInventoryText("sword", "Bronze"));
         HBox armorLabel = inventoryItemLabel("Armor", townController.getInventoryText("armor", "Bronze"));
 
-        Label potionLabel = new Label("Healing Potions: " + townController.getInventoryNumber("healing_potions", 0));
-        potionLabel.setStyle("-fx-font-size: 28px; -fx-text-fill: white;");
 
         Button inventoryBackButton = shopButton("Back", "");
         VBox.setMargin(inventoryBackButton, new Insets(30, 0, 0, 0));
@@ -501,7 +499,17 @@ public class SceneFactory {
         Separator sep1 = new Separator();
         Separator sep2 = new Separator();
 
-        VBox inventoryPanel = new VBox(12, swordLabel, sep1, armorLabel, sep2, potionLabel, inventoryBackButton);
+        // Healing Potion Button for inventory panel
+        Button potionButton = shopButton("Healing Potions:", String.valueOf(townController.getInventoryNumber("healing_potions", 0)));
+        potionButton.setOnAction(e -> {
+            useHealingPotion();
+            int updatedHealth = townController.getInventoryNumber("health", 100);
+            healthBar.setProgress(updatedHealth / 100.0);
+            healthLabel.setText(updatedHealth + "%");
+            potionButton.setGraphic(shopButton("Healing Potions:", String.valueOf(townController.getInventoryNumber("healing_potions", 0))).getGraphic());
+        });
+
+        VBox inventoryPanel = new VBox(12, swordLabel, sep1, armorLabel, sep2, potionButton, inventoryBackButton);
         inventoryPanel.setAlignment(Pos.TOP_LEFT);
         inventoryPanel.setPrefSize(350, 360);
         inventoryPanel.setPadding(new Insets(28, 18, 28, 18));
@@ -550,7 +558,7 @@ public class SceneFactory {
         healingButton.setOnAction(e -> {
             String message = townController.buyHealingPotion();
             if (message.isEmpty()) {
-                potionLabel.setText("Healing Potions: " + townController.getInventoryNumber("healing_potions", 0));
+                potionButton.setGraphic(shopButton("Healing Potions:", String.valueOf(townController.getInventoryNumber("healing_potions", 0))).getGraphic());
                 battlesValue.setText(String.valueOf(townController.getCurrentBattlesWon()));
 
                 Button newHealingButton = shopButton("Healing -", String.valueOf(townController.getHealingPrice()));
@@ -575,6 +583,28 @@ public class SceneFactory {
         layout.getChildren().addAll(title, healthContainer, heroBox, mainPanel, shopPanel, inventoryPanel);
         return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
+
+    private void useHealingPotion() {
+        int currentPotions = townController.getInventoryNumber("healing_potions", 0);
+        int currentHealth = townController.getInventoryNumber("health", 100);
+
+        if (currentPotions <= 0 || currentHealth >= 100) {
+            return;
+        }
+
+        int updatedHealth = Math.min(100, currentHealth + 50);
+        String sql = "UPDATE inventory SET health = ?, healing_potions = ? WHERE username = ?";
+
+        try (java.sql.PreparedStatement stmt = userDataManager.getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, updatedHealth);
+            stmt.setInt(2, currentPotions - 1);
+            stmt.setString(3, currentUsername);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Use healing potion failed: " + e.getMessage());
+        }
+    }
+
 
     private Button shopButton(String itemText, String priceText) {
         Label itemLabel = new Label(itemText);
