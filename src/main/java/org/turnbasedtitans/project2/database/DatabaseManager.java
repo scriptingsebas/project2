@@ -55,7 +55,7 @@ public class DatabaseManager {
                 username TEXT PRIMARY KEY,
                 sword TEXT DEFAULT 'Bronze',
                 armor TEXT DEFAULT 'Bronze',
-                healing_potions INTEGER DEFAULT 0,
+                healing_potions INTEGER DEFAULT 2,
                 battles_won INTEGER DEFAULT 0,
                 health INTEGER DEFAULT 100,
                 FOREIGN KEY(username) REFERENCES users(username)

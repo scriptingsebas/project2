@@ -60,10 +60,17 @@ public class RPGBattleSystem {
         }
     }
 
+
     //PLAYER HEALTH MANAGEMENT SECTION:
+
 
     public int getPlayerHP() {
         return playerHP;
+    }
+
+    public void setPlayerHP(int playerHP) {
+        this.playerHP = Math.max(0, Math.min(100, playerHP));
+        savePlayerHP();
     }
 
     public void ApplyDamagePlayer(int damageDealt) {
