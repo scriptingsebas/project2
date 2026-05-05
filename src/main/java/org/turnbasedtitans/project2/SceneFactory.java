@@ -1,5 +1,6 @@
 package org.turnbasedtitans.project2;
 
+import org.turnbasedtitans.project2.controller.DungeonController;
 import org.turnbasedtitans.project2.controller.LogInController;
 import org.turnbasedtitans.project2.controller.RegisterController;
 import org.turnbasedtitans.project2.database.InventoryDAO;
@@ -277,8 +278,10 @@ public class SceneFactory {
         Button backButton = new Button(goBack);
         Button forwardButton = new Button(pressOn);
 
-        //backButton.setOnAction(e -> stage.setScene(town(stage));
-        //forwardButton.setOnAction(e -> stage.setScene(dungeonFight(stage)));
+        backButton.setOnAction(e -> stage.setScene(town(stage, currentUsername)));
+
+        forwardButton.setOnAction(e -> stage.setScene(dungeonFight(stage)));
+
 
         VBox titleSection = new VBox(dungeonSpacing, titleLabel);
         titleSection.setAlignment(Pos.CENTER);
@@ -295,98 +298,60 @@ public class SceneFactory {
 
         return new Scene(dungeonScene, SCENE_WIDTH, SCENE_HEIGHT);
     }
-//    private Scene dungeonFight (Stage stage) {
-//        PREFIGHT SET-UP
-//        EnemyController systemControl = new EnemyController();
-//        Enemies commonEnemy = systemControl.enemyRandomizer();
-//        RPGBattleSystem battleSystem = new RPGBattleSystem(commonEnemy, inventoryDAO, currentUsername);
-//        Label battleTracker = new Label();
-//
-//        //TEXT SECTION
-//        Label encounterLabel = new Label("A wild " + commonEnemy.getEnemyName() + "has appeared!");
-//        Label warningLabel = new Label(encounterText);
-//        Label playerHealth = new Label("Player HP: " + battleSystem.getPlayerHP());
-//        Label enemyHealth = new Label(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
-//
-//        //ACTION BUTTON SECTION
-//        Button attackButton = new Button(userAttack);
-//        Button defendButton = new Button(userDefend);
-//        Button escapeButton = new Button(userEscape);
-//
-//        //POLISH/FORMATTING
-//        attackButton.setPrefWidth(100);
-//        defendButton.setPrefWidth(100);
-//        escapeButton.setPrefWidth(100);
-//
-//        encounterLabel.setWrapText(true);
-//        encounterLabel.setMaxWidth(SCENE_WIDTH);
-//
-//        warningLabel.setWrapText(true);
-//        warningLabel.setMaxWidth(SCENE_WIDTH);
-//
-//        attackButton.setOnAction(e -> {
-//            int playerDMG = battleSystem.playerAttack();
-//
-//            if(battleSystem.enemyDefeatedTF()) {
-//                townController.addBattlesWon();
-//                stage.setScene(town(stage, currentUsername));
-//                return;
-//            }
-//            int enemyDMG = battleSystem.enemyAttack();
-//            playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
-//            enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
-//            battleTracker.setText("You've dealt " + playerDMG + "!\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
-//
-//            if(battleSystem.playerDefeatedTF()) {
-//                stage.setScene(town(stage, currentUsername));
-//            }
-//        });
-//
-//        defendButton.setOnAction(e -> {
-//            battleSystem.activateDefend();
-//            int enemyDMG = battleSystem.enemyAttack();
-//            playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
-//            enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
-//            battleTracker.setText("You defend yourself against the oncoming attack...\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
-//
-//            if(battleSystem.playerDefeatedTF()) {
-//                stage.setScene(town(stage, currentUsername));
-//            }
-//        });
-//
-//        escapeButton.setOnAction(e -> {
-//            int rngRoll = battleSystem.escapeChance();
-//            if (battleSystem.escapeSuccess(rngRoll)) {
-//                stage.setScene(dungeonStart(stage));
-//            } else {
-//                int enemyDMG = battleSystem.enemyAttack();
-//                playerHealth.setText("Player HP: " + battleSystem.getPlayerHP());
-//                enemyHealth.setText(commonEnemy.getEnemyName() + "HP: " + battleSystem.getEnemyHP());
-//                battleTracker.setText("You failed to run away!\n" + commonEnemy.getEnemyName() + "dealt " + enemyDMG + "!");
-//            }
-//            if(battleSystem.playerDefeatedTF()) {
-//                stage.setScene(town(stage, currentUsername));
-//            }
-//        });
-//        VBox textSection = new VBox(10, encounterLabel, warningLabel, playerHealth, enemyHealth, battleTracker);
-//        textSection.setAlignment(Pos.CENTER);
-//
-//        HBox buttonSection = new HBox(15, attackButton, defendButton, escapeButton);
-//        buttonSection.setAlignment(Pos.CENTER);
-//
-//        VBox fightLayout = new VBox(30, textSection, buttonSection);
-//        fightLayout.setAlignment(Pos.CENTER);
-//        fightLayout.setPadding(new Insets(30));
-//
-//        return new Scene(fightLayout, SCENE_WIDTH, SCENE_HEIGHT);
-//    }
+    private Scene dungeonFight (Stage stage) {
+        //LABEL SECTION
+        Label battleLog = new Label();
+        Label warningLabel = new Label(encounterText);
+        Label encounterLabel = new Label();
+        Label playerHealth = new Label();
+        Label enemyHealth = new Label();
+
+        //DUNGEON CONTROLLER
+        DungeonController dungeonController = new DungeonController(battleLog, playerHealth, enemyHealth, this, townController, currentUsername, stage, inventoryDAO);
+
+        //ENCOUNTER
+        encounterLabel.setText("A wild " + dungeonController.getDungeonEnemy().getEnemyName() + " has appeared!");
+
+        //BUTTON SECTION
+        Button attackButton = new Button(userAttack);
+        Button defendButton = new Button(userDefend);
+        Button escapeButton = new Button(userEscape);
+
+        //POLISH/FORMATTING
+        attackButton.setPrefWidth(100);
+        defendButton.setPrefWidth(100);
+        escapeButton.setPrefWidth(100);
+
+        encounterLabel.setWrapText(true);
+        encounterLabel.setMaxWidth(SCENE_WIDTH);
+
+        warningLabel.setWrapText(true);
+        warningLabel.setMaxWidth(SCENE_WIDTH);
+
+
+        //BUTTON FUNCTIONALITY/DUNGEON CONTROLLER
+        attackButton.setOnAction(e -> dungeonController.playerAttack());
+        defendButton.setOnAction(e -> dungeonController.playerDefend());
+        escapeButton.setOnAction(e -> dungeonController.playerEscape());
+
+        VBox textSection = new VBox(10, encounterLabel, warningLabel, playerHealth, enemyHealth, battleLog);
+        textSection.setAlignment(Pos.CENTER);
+
+        HBox buttonSection = new HBox(15, attackButton, defendButton, escapeButton);
+        buttonSection.setAlignment(Pos.CENTER);
+
+        VBox fightLayout = new VBox(30, textSection, buttonSection);
+        fightLayout.setAlignment(Pos.CENTER);
+        fightLayout.setPadding(new Insets(30));
+
+        return new Scene(fightLayout, SCENE_WIDTH, SCENE_HEIGHT);
+    }
 
     public Scene town(Stage stage, String username) {
         currentUsername = username;
         townController.setCurrentUsername(username);
         return townUI(stage, "");
     }
-
 
     private HBox inventoryItemLabel(String labelText, String itemName) {
         Label nameLabel = new Label(labelText + ": ");
