@@ -6,5 +6,5 @@ public enum SceneType {
     LOGIN,
     TOWN,
     DUNGEON_START,
-    //DUNGEON_FIGHT
+    DUNGEON_FIGHT
 }
