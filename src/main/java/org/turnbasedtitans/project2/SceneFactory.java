@@ -1,10 +1,7 @@
 package org.turnbasedtitans.project2;
 
-import org.turnbasedtitans.project2.controller.DungeonController;
-import org.turnbasedtitans.project2.controller.LogInController;
-import org.turnbasedtitans.project2.controller.RegisterController;
+import org.turnbasedtitans.project2.controller.*;
 import org.turnbasedtitans.project2.database.InventoryDAO;
-import org.turnbasedtitans.project2.controller.TownController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -78,7 +75,7 @@ public class SceneFactory {
             case LOGIN -> logInPage(stage) ;
             case TOWN -> town(stage, currentUsername) ;
             case DUNGEON_START -> dungeonStart(stage) ;
-            //case DUNGEON_FIGHT -> dungeonFight(stage) ;
+            case DUNGEON_FIGHT -> dungeonFight(stage) ;
         };
     }
 
@@ -268,20 +265,26 @@ public class SceneFactory {
         return new Scene(layout, SCENE_WIDTH, SCENE_HEIGHT);
     }
     private Scene dungeonStart (Stage stage) {
+        //SPACING
         int dungeonSpacing = 10;
 
+        //LABEL SECTION
         Label titleLabel = new Label(dungeonTitle);
         Label bodyLabel = new Label(bodyText);
         Label conclusionLabel = new Label(conclusionText);
         Label promptLabel = new Label(userPrompt);
 
-        Button backButton = new Button(goBack);
+        //BUTTON SECTION
         Button forwardButton = new Button(pressOn);
+        Button backButton = new Button(goBack);
 
-        backButton.setOnAction(e -> stage.setScene(town(stage, currentUsername)));
+        //CONTROLLER
+        DungeonStartController dungeonStartController = new DungeonStartController(this, stage, currentUsername);
 
-        forwardButton.setOnAction(e -> stage.setScene(dungeonFight(stage)));
 
+        //BUTTON FUNCTIONALITY
+        forwardButton.setOnAction(e -> dungeonStartController.pressOn());
+        backButton.setOnAction(e -> dungeonStartController.turnBack());
 
         VBox titleSection = new VBox(dungeonSpacing, titleLabel);
         titleSection.setAlignment(Pos.CENTER);
