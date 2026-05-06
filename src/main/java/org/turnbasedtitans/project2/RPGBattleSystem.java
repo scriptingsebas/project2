@@ -14,6 +14,8 @@ public class RPGBattleSystem {
     private int enemyHP;
     private InventoryDAO inventoryDAO;
     private String username;
+    private String sword = "Bronze";
+    private String armor = "Bronze";
 
     //ATTACK PRESET(S):
     private final int baseDMG = 5;
@@ -33,19 +35,22 @@ public class RPGBattleSystem {
         //CONSTRUCTOR WITH DATABASE HEALTH
         this.inventoryDAO = inventoryDAO;
         this.username = username;
-        playerHP = getSavedPlayerHP();
+        loadInventoryStats();
         enemyHP = dungeonEnemy.getEnemyHP();
     }
 
-    private int getSavedPlayerHP() {
+    private void loadInventoryStats() {
         try (ResultSet inventory = inventoryDAO.getInventory(username)) {
             if (inventory.next()) {
-                return inventory.getInt("health");
+                playerHP = inventory.getInt("health");
+                sword = inventory.getString("sword");
+                armor = inventory.getString("armor");
+                return;
             }
         } catch (SQLException e) {
-            System.out.println("Could not load player health: " + e.getMessage());
+            System.out.println("Could not load inventory stats: " + e.getMessage());
         }
-        return 100;
+        playerHP = 100;
     }
 
     private void savePlayerHP() {
@@ -59,6 +64,37 @@ public class RPGBattleSystem {
             System.out.println("Could not save player health: " + e.getMessage());
         }
     }
+
+//    Sword:
+//    Bronze: 0 (default)
+//    Iron: +20% damage boost
+//    Diamond: +50%
+//
+//    Armor:
+//    Bronze: 0 (default)
+//    Iron: +20% protection
+//    Diamond: +50 protection
+
+    private int applySwordBoost(int damage) {
+        if ("Diamond".equalsIgnoreCase(sword)) {
+            return (int) Math.round(damage * 1.5);
+        }
+        if ("Iron".equalsIgnoreCase(sword)) {
+            return (int) Math.round(damage * 1.2);
+        }
+        return damage;
+    }
+
+    private int applyArmorProtection(int damage) {
+        if ("Diamond".equalsIgnoreCase(armor)) {
+            return (int) Math.round(damage * 0.5);
+        }
+        if ("Iron".equalsIgnoreCase(armor)) {
+            return (int) Math.round(damage * 0.8);
+        }
+        return damage;
+    }
+
 
 
     //PLAYER HEALTH MANAGEMENT SECTION:
@@ -112,7 +148,7 @@ public class RPGBattleSystem {
     //PLAYER ATTACK MANAGEMENT SECTION:
     public int playerAttack() {
         int rollDMG = RNG.nextInt(10) + 1;
-        int totalDMG = baseDMG + rollDMG;
+        int totalDMG = applySwordBoost(baseDMG + rollDMG);
         ApplyDamageEnemy(totalDMG);
         return totalDMG;
     }
@@ -125,6 +161,7 @@ public class RPGBattleSystem {
             totalDMG /= 2;
             defendState = false;
         }
+        totalDMG = applyArmorProtection(totalDMG);
         ApplyDamagePlayer(totalDMG);
         return totalDMG;
     }

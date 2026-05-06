@@ -266,6 +266,27 @@ public class TownController {
         return "";
     }
 
+    public void useHealingPotion() {
+        int currentPotions = getInventoryNumber("healing_potions", 0);
+        int currentHealth = getInventoryNumber("health", 100);
+
+        if (currentPotions <= 0 || currentHealth >= 100) {
+            return;
+        }
+
+        int updatedHealth = Math.min(100, currentHealth + 50);
+        String sql = "UPDATE inventory SET health = ?, healing_potions = ? WHERE username = ?";
+
+        try (java.sql.PreparedStatement stmt = userDataManager.getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, updatedHealth);
+            stmt.setInt(2, currentPotions - 1);
+            stmt.setString(3, currentUsername);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Use healing potion failed: " + e.getMessage());
+        }
+    }
+
     public String itemColor(String itemName) {
         if (itemName.equals("Bronze")) {
             return "#CD7F32";
